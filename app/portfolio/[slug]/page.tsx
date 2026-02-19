@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
-import { ArticleContent } from "@/app/blog/[slug]/article-content";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 
 function ArrowLeftIcon() {
   return (
@@ -40,11 +40,23 @@ export default async function ProjectDetailPage({
 }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: project } = await supabase
+  
+  // Try to find by slug first
+  let { data: project } = await supabase
     .from("projects")
     .select("*")
     .eq("slug", slug)
     .single();
+
+  // If not found, and slug looks like a UUID, try to find by ID
+  if (!project && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)) {
+     const { data: projectById } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", slug)
+        .single();
+     project = projectById;
+  }
 
   if (!project) notFound();
 
@@ -58,11 +70,22 @@ export default async function ProjectDetailPage({
           </Link>
         </Button>
 
-        <header className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+        {project.image_url && (
+            <div className="rounded-xl border border-border/40 overflow-hidden mb-10 bg-muted/20">
+                 {/* eslint-disable-next-line @next/next/no-img-element */}
+                 <img 
+                    src={project.image_url} 
+                    alt={project.title} 
+                    className="w-full h-auto max-h-[500px] object-cover" 
+                 />
+            </div>
+        )}
+
+        <header className="mb-8 md:mb-10">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-3 md:mb-4">
             {project.title}
           </h1>
-          <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
+          <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
              {project.description}
           </p>
 
@@ -102,7 +125,7 @@ export default async function ProjectDetailPage({
         </header>
         
         {project.content ? (
-             <ArticleContent content={project.content} />
+             <MarkdownRenderer content={project.content} />
         ) : (
              <div className="prose prose-neutral dark:prose-invert">
                  <p className="italic text-muted-foreground">No detailed description available for this project.</p>

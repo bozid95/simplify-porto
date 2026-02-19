@@ -57,9 +57,19 @@ export default async function PortfolioPage() {
           <div className="grid gap-4">
             {projects.map((project) => (
               <div key={project.id} className="group relative">
-                <Link href={project.slug ? `/portfolio/${project.slug}` : "#"} className={!project.slug ? "cursor-default" : ""}>
-                    <Card className="border-border/40 bg-card/50 backdrop-blur-sm h-full transition-colors hover:bg-card/80">
-                        <CardHeader className="pb-3">
+                <Link href={`/portfolio/${project.slug || project.id}`} className="block h-full">
+                    <Card className="border-border/40 bg-card/50 backdrop-blur-sm h-full transition-all hover:bg-card/80 overflow-hidden flex flex-col">
+                        {project.image_url && (
+                          <div className="aspect-video w-full overflow-hidden border-b border-border/40">
+                             {/* eslint-disable-next-line @next/next/no-img-element */}
+                             <img 
+                                src={project.image_url} 
+                                alt={project.title} 
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                             />
+                          </div>
+                        )}
+                        <CardHeader className="pb-3 flex-none">
                         <div className="flex items-start justify-between">
                             <CardTitle className="text-lg group-hover:text-primary transition-colors">{project.title}</CardTitle>
                         </div>
