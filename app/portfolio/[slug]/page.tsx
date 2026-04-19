@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 
@@ -61,77 +62,101 @@ export default async function ProjectDetailPage({
   if (!project) notFound();
 
   return (
-    <div className="min-h-screen bg-background">
-      <article className="max-w-3xl mx-auto px-4 py-12">
-        <Button variant="ghost" size="sm" className="mb-8 gap-2" asChild>
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-0 top-0 h-80 w-80 -translate-x-1/4 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute right-0 top-1/4 h-96 w-96 translate-x-1/4 rounded-full bg-muted-foreground/10 blur-3xl" />
+      </div>
+
+      <article className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-8 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
+          asChild
+        >
           <Link href="/portfolio">
             <ArrowLeftIcon />
             Back to Portfolio
           </Link>
         </Button>
 
-        {project.image_url && (
-            <div className="rounded-xl border border-border/40 overflow-hidden mb-10 bg-muted/20">
-                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                 <img 
-                    src={project.image_url} 
-                    alt={project.title} 
-                    className="w-full h-auto max-h-[500px] object-cover" 
-                 />
+        <Card className="overflow-hidden rounded-[2rem] border-border/50 bg-card/75 py-0 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl">
+          {project.image_url && (
+            <div className="overflow-hidden border-b border-border/40 bg-muted/20">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={project.image_url}
+                alt={project.title}
+                className="h-auto max-h-[520px] w-full object-cover"
+              />
             </div>
-        )}
+          )}
 
-        <header className="mb-8 md:mb-10">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-3 md:mb-4">
-            {project.title}
-          </h1>
-          <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
-             {project.description}
-          </p>
+          <CardContent className="px-6 py-8 sm:px-8 sm:py-10">
+            <header className="mb-8 md:mb-10">
+              <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Project Overview
+              </p>
+              <h1 className="mb-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+                {project.title}
+              </h1>
+              <p className="mb-8 max-w-3xl text-base leading-8 text-muted-foreground sm:text-lg">
+                {project.description}
+              </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
-             <div className="flex gap-2">
-                {project.live_url && (
-                    <Button size="sm" className="gap-2" asChild>
-                    <a href={project.live_url} target="_blank" rel="noopener noreferrer">
+              <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap gap-2">
+                  {project.live_url && (
+                    <Button size="sm" className="gap-2 rounded-full px-4" asChild>
+                      <a href={project.live_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLinkIcon />
                         Visit Site
-                    </a>
+                      </a>
                     </Button>
-                )}
-                {project.repo_url && (
-                    <Button variant="outline" size="sm" className="gap-2" asChild>
-                    <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
+                  )}
+                  {project.repo_url && (
+                    <Button variant="outline" size="sm" className="gap-2 rounded-full px-4 bg-background/70" asChild>
+                      <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
                         <GithubIcon />
                         View Code
-                    </a>
+                      </a>
                     </Button>
-                )}
-             </div>
-          </div>
-          
-          <div className="space-y-2">
-             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Tech Stack</h3>
-             {project.tech_stack?.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                {project.tech_stack.map((tech: string) => (
-                    <Badge key={tech} variant="secondary" className="text-sm font-normal px-2.5 py-1">
-                    {tech}
-                    </Badge>
-                ))}
+                  )}
                 </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="font-mono text-sm font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                  Tech Stack
+                </h3>
+                {project.tech_stack?.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                {project.tech_stack.map((tech: string) => (
+                    <Badge
+                      key={tech}
+                      variant="secondary"
+                      className="rounded-full border border-border/40 bg-background/70 px-3 py-1 text-[11px] font-medium"
+                    >
+                      {tech}
+                    </Badge>
+                  ))}
+                  </div>
+                )}
+              </div>
+            </header>
+
+            {project.content ? (
+              <MarkdownRenderer content={project.content} />
+            ) : (
+              <div className="prose prose-neutral dark:prose-invert">
+                <p className="italic text-muted-foreground">
+                  No detailed description available for this project.
+                </p>
+              </div>
             )}
-          </div>
-        </header>
-        
-        {project.content ? (
-             <MarkdownRenderer content={project.content} />
-        ) : (
-             <div className="prose prose-neutral dark:prose-invert">
-                 <p className="italic text-muted-foreground">No detailed description available for this project.</p>
-             </div>
-        )}
-       
+          </CardContent>
+        </Card>
       </article>
     </div>
   );

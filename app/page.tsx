@@ -5,6 +5,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Spotlight } from "@/components/ui/spotlight";
+import { GradientFrame } from "@/components/ui/gradient-frame";
+import { Card3D } from "@/components/ui/card-3d";
 
 // SVG Icons as components
 function GithubIcon() {
@@ -43,6 +46,15 @@ function MailIcon() {
   );
 }
 
+function ArrowUpRightIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 17 17 7" />
+      <path d="M7 7h10v10" />
+    </svg>
+  );
+}
+
 function FolderIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -68,6 +80,13 @@ interface SocialLinks {
   [key: string]: string | undefined;
 }
 
+interface SocialItem {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  external: boolean;
+}
+
 export default async function Home() {
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -80,6 +99,32 @@ export default async function Home() {
   const bio = profile?.bio || "Hello! I build things on the internet.";
   const avatarUrl = profile?.avatar_url || "";
   const socialLinks: SocialLinks = (profile?.social_links as SocialLinks) || {};
+  const socialItems: SocialItem[] = [
+    {
+      href: socialLinks.github,
+      label: "GitHub",
+      icon: <GithubIcon />,
+      external: true,
+    },
+    {
+      href: socialLinks.linkedin,
+      label: "LinkedIn",
+      icon: <LinkedinIcon />,
+      external: true,
+    },
+    {
+      href: socialLinks.twitter,
+      label: "Twitter",
+      icon: <TwitterIcon />,
+      external: true,
+    },
+    {
+      href: socialLinks.email ? `mailto:${socialLinks.email}` : undefined,
+      label: "Email",
+      icon: <MailIcon />,
+      external: false,
+    },
+  ].filter((item): item is SocialItem => Boolean(item.href));
 
   const initials = name
     .split(" ")
@@ -89,93 +134,133 @@ export default async function Home() {
     .slice(0, 2);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4 relative">
-      <div className="absolute top-4 right-4">
+    <div className="relative overflow-hidden bg-background">
+      <div className="pointer-events-none absolute inset-0">
+        <Spotlight className="left-1/2 top-0 h-72 w-72 -translate-x-[130%]" fill="rgba(120,120,120,0.18)" />
+        <Spotlight className="right-0 top-1/3 h-80 w-80 translate-x-1/4" fill="rgba(160,160,160,0.14)" />
+        <Spotlight className="bottom-0 left-1/2 h-64 w-64 -translate-x-1/2 translate-y-1/3" fill="rgba(120,120,120,0.12)" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.14),_transparent_32%),linear-gradient(to_bottom,_transparent,_rgba(0,0,0,0.04))]" />
+      </div>
+
+      <div className="absolute right-4 top-4 z-20">
         <ThemeToggle />
       </div>
-      <Card className="w-full max-w-md border-border/40 bg-card/50 backdrop-blur-sm">
-        <CardContent className="flex flex-col items-center gap-6 pt-8 pb-8">
-          {/* Avatar */}
-          <Avatar className="h-24 w-24 ring-2 ring-border/50 ring-offset-2 ring-offset-background">
-            <AvatarImage src={avatarUrl} alt={name} />
-            <AvatarFallback className="text-2xl font-semibold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
 
-          {/* Name & Tagline */}
-          <div className="text-center">
-            <h1 className="text-2xl font-bold tracking-tight">{name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{tagline}</p>
-          </div>
+      <div className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 sm:py-14">
+        <Card3D className="w-full max-w-lg">
+          <GradientFrame className="w-full max-w-lg">
+            <Card className="relative w-full overflow-hidden rounded-[calc(2rem-1px)] border-0 bg-card/75 py-0 shadow-none">
+              <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_32%,transparent_65%,rgba(255,255,255,0.1))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_32%,transparent_65%,rgba(255,255,255,0.04))]" />
+              <Spotlight className="-left-8 top-8 h-40 w-40" fill="rgba(255,255,255,0.16)" />
 
-          {/* Bio */}
-          <p className="text-center text-sm text-muted-foreground leading-relaxed max-w-xs">
-            {bio}
-          </p>
+              <CardContent className="relative flex flex-col gap-7 px-6 py-7 sm:px-8 sm:py-8">
+                <div className="flex items-start justify-between gap-4 [transform:translateZ(30px)]">
+                <div className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground backdrop-blur">
+                  Portfolio & Notes
+                </div>
+              </div>
 
-          <Separator className="w-full opacity-50" />
+                <div className="flex flex-col items-center gap-5 text-center">
+                  <div className="relative [transform:translateZ(60px)]">
+                    <div className="absolute inset-0 rounded-full bg-primary/15 blur-xl" />
+                    <Avatar className="relative h-24 w-24 border border-border/60 ring-4 ring-background/80 shadow-lg">
+                      <AvatarImage src={avatarUrl} alt={name} />
+                      <AvatarFallback className="bg-muted text-2xl font-semibold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
 
-          {/* Navigation Links */}
-          <div className="flex flex-col gap-3 w-full">
-            <Button
-              variant="outline"
-              className="w-full h-12 justify-start gap-3 text-sm font-medium"
-              asChild
-            >
-              <Link href="/portfolio">
-                <FolderIcon />
-                Portfolio
-              </Link>
-            </Button>
+                  <div className="space-y-2 [transform:translateZ(50px)]">
+                  <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">{name}</h1>
+                  <p className="text-sm font-medium text-muted-foreground/90 sm:text-[15px]">{tagline}</p>
+                </div>
 
-            <Button
-              variant="outline"
-              className="w-full h-12 justify-start gap-3 text-sm font-medium"
-              asChild
-            >
-              <Link href="/blog">
-                <PenIcon />
-                Blog
-              </Link>
-            </Button>
-          </div>
+                  <p className="max-w-sm text-sm leading-7 text-muted-foreground sm:text-[15px] [transform:translateZ(40px)]">
+                    {bio}
+                  </p>
+                </div>
 
-          <Separator className="w-full opacity-50" />
+                <Separator className="w-full opacity-60" />
 
-          {/* Social Links */}
-          <div className="flex gap-2">
-            {socialLinks.github && (
-              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full" asChild>
-                <a href={socialLinks.github} target="_blank" rel="noopener noreferrer">
-                  <GithubIcon />
-                </a>
-              </Button>
-            )}
-            {socialLinks.linkedin && (
-              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full" asChild>
-                <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
-                  <LinkedinIcon />
-                </a>
-              </Button>
-            )}
-            {socialLinks.twitter && (
-              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full" asChild>
-                <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer">
-                  <TwitterIcon />
-                </a>
-              </Button>
-            )}
-            {socialLinks.email && (
-              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full" asChild>
-                <a href={`mailto:${socialLinks.email}`}>
-                  <MailIcon />
-                </a>
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                <div className="grid gap-3 [transform:translateZ(35px)]">
+                  <Button
+                    variant="outline"
+                    className="group h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-4 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
+                    asChild
+                  >
+                    <Link href="/portfolio">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-foreground">
+                        <FolderIcon />
+                      </span>
+                      <span className="flex flex-1 flex-col items-start">
+                        <span className="text-sm font-semibold">Portfolio</span>
+                        <span className="text-xs font-normal text-muted-foreground">Selected work, case studies, and experiments</span>
+                      </span>
+                      <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                        <ArrowUpRightIcon />
+                      </span>
+                    </Link>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="group h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-4 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
+                    asChild
+                  >
+                    <Link href="/blog">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-foreground">
+                        <PenIcon />
+                      </span>
+                      <span className="flex flex-1 flex-col items-start">
+                        <span className="text-sm font-semibold">Blog</span>
+                        <span className="text-xs font-normal text-muted-foreground">Notes, writing, and things worth sharing</span>
+                      </span>
+                      <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                        <ArrowUpRightIcon />
+                      </span>
+                    </Link>
+                  </Button>
+                </div>
+
+                {socialItems.length > 0 && (
+                  <>
+                    <Separator className="w-full opacity-60" />
+
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background/55 px-3 py-3 backdrop-blur-sm [transform:translateZ(30px)]">
+                      <p className="pl-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                        Connect
+                      </p>
+                      <div className="flex flex-wrap justify-end gap-2">
+                        {socialItems.map((item) => (
+                          <Button
+                            key={item.label}
+                            variant="ghost"
+                            size="icon"
+                            className="h-10 w-10 rounded-full border border-transparent bg-background/70 transition-all hover:border-border hover:bg-background"
+                            asChild
+                          >
+                            <a
+                              href={item.href}
+                              target={item.external ? "_blank" : undefined}
+                              rel={item.external ? "noopener noreferrer" : undefined}
+                              aria-label={item.label}
+                              title={item.label}
+                            >
+                              {item.icon}
+                            </a>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </GradientFrame>
+        </Card3D>
+      </div>
     </div>
   );
 }

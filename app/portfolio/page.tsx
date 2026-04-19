@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Spotlight } from "@/components/ui/spotlight";
+import { GradientFrame } from "@/components/ui/gradient-frame";
 
 function ArrowLeftIcon() {
   return (
@@ -40,78 +42,117 @@ export default async function PortfolioPage() {
     .order("sort_order", { ascending: true });
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="mx-auto max-w-2xl py-8">
-        {/* Back Button */}
-        <Button variant="ghost" size="sm" className="mb-8 gap-2" asChild>
+    <div className="relative min-h-screen overflow-hidden bg-background px-4 py-6">
+      <div className="pointer-events-none absolute inset-0">
+        <Spotlight className="left-0 top-0 h-72 w-72 -translate-x-1/3" fill="rgba(120,120,120,0.18)" />
+        <Spotlight className="right-0 top-1/4 h-80 w-80 translate-x-1/4" fill="rgba(160,160,160,0.14)" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_35%)]" />
+      </div>
+
+      <div className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-8 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
+          asChild
+        >
           <Link href="/">
             <ArrowLeftIcon />
             Back
           </Link>
         </Button>
 
-        <h1 className="text-2xl font-bold tracking-tight mb-8">Portfolio</h1>
+        <div className="mb-10 max-w-2xl">
+          <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Selected Projects
+          </p>
+          <h1 className="mb-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+            Portfolio
+          </h1>
+        </div>
 
-        {/* Projects Grid */}
         {projects && projects.length > 0 ? (
-          <div className="grid gap-4">
+          <div className="grid gap-5 md:grid-cols-2">
             {projects.map((project) => (
               <div key={project.id} className="group relative">
                 <Link href={`/portfolio/${project.slug || project.id}`} className="block h-full">
-                    <Card className="border-border/40 bg-card/50 backdrop-blur-sm h-full transition-all hover:bg-card/80 overflow-hidden flex flex-col">
-                        {project.image_url && (
-                          <div className="aspect-video w-full overflow-hidden border-b border-border/40">
-                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                             <img 
-                                src={project.image_url} 
-                                alt={project.title} 
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                             />
-                          </div>
-                        )}
-                        <CardHeader className="pb-3 flex-none">
-                        <div className="flex items-start justify-between">
-                            <CardTitle className="text-lg group-hover:text-primary transition-colors">{project.title}</CardTitle>
+                  <GradientFrame className="h-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_80px_rgba(0,0,0,0.14)]">
+                    <Card className="h-full overflow-hidden rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
+                      {project.image_url && (
+                        <div className="aspect-[16/10] w-full overflow-hidden border-b border-border/40 bg-muted/30">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={project.image_url}
+                            alt={project.title}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
                         </div>
-                        </CardHeader>
-                        <CardContent>
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
-                            {project.description}
+                      )}
+                      <CardHeader className="pb-3 flex-none">
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="text-xl font-semibold transition-colors group-hover:text-primary">
+                            {project.title}
+                          </CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pb-6">
+                        <p className="mb-4 line-clamp-3 text-sm leading-7 text-muted-foreground">
+                          {project.description}
                         </p>
                         {project.tech_stack && project.tech_stack.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-2">
                             {project.tech_stack.map((tech: string) => (
-                                <Badge key={tech} variant="secondary" className="text-xs font-normal">
+                              <Badge
+                                key={tech}
+                                variant="secondary"
+                                className="rounded-full border border-border/40 bg-background/70 px-3 py-1 text-[11px] font-medium"
+                              >
                                 {tech}
-                                </Badge>
+                              </Badge>
                             ))}
-                            </div>
+                          </div>
                         )}
-                        </CardContent>
+                      </CardContent>
                     </Card>
+                  </GradientFrame>
                 </Link>
-                 {/* Action Buttons Overlay or Separate */}
-                 <div className="absolute top-4 right-4 flex gap-1 z-10">
-                      {project.live_url && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/50 backdrop-blur-sm hover:bg-background" asChild>
-                          <a href={project.live_url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLinkIcon />
-                          </a>
-                        </Button>
-                      )}
-                      {project.repo_url && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/50 backdrop-blur-sm hover:bg-background" asChild>
-                          <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
-                            <GithubIcon />
-                          </a>
-                        </Button>
-                      )}
-                  </div>
+                <div className="absolute right-4 top-4 z-10 flex gap-2">
+                  {project.live_url && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-full border border-border/50 bg-background/75 backdrop-blur-md hover:bg-background"
+                      asChild
+                    >
+                      <a href={project.live_url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLinkIcon />
+                      </a>
+                    </Button>
+                  )}
+                  {project.repo_url && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-full border border-border/50 bg-background/75 backdrop-blur-md hover:bg-background"
+                      asChild
+                    >
+                      <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
+                        <GithubIcon />
+                      </a>
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm">No projects yet.</p>
+          <GradientFrame>
+            <Card className="rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 backdrop-blur-xl shadow-none">
+              <CardContent className="px-6 py-8 text-sm text-muted-foreground">
+                No projects yet.
+              </CardContent>
+            </Card>
+          </GradientFrame>
         )}
       </div>
     </div>

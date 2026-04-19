@@ -1,6 +1,8 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Spotlight } from "@/components/ui/spotlight";
+import { GradientFrame } from "@/components/ui/gradient-frame";
 
 function ArrowLeftIcon() {
   return (
@@ -13,41 +15,55 @@ function ArrowLeftIcon() {
 
 export default function PortfolioLoading() {
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="mx-auto max-w-2xl py-8">
-        {/* Back Button Skeleton */}
+    <div className="relative min-h-screen overflow-hidden bg-background px-4 py-6">
+      <div className="pointer-events-none absolute inset-0">
+        <Spotlight className="left-0 top-0 h-72 w-72 -translate-x-1/3" fill="rgba(120,120,120,0.18)" />
+        <Spotlight className="right-0 top-1/4 h-80 w-80 translate-x-1/4" fill="rgba(160,160,160,0.14)" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_35%)]" />
+      </div>
+
+      <div className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <Button variant="ghost" size="sm" className="mb-8 gap-2 disabled:opacity-50">
            <ArrowLeftIcon />
            Back
         </Button>
 
-        <h1 className="text-2xl font-bold tracking-tight mb-8">Portfolio</h1>
+        <div className="mb-10 max-w-2xl space-y-3">
+          <Skeleton className="h-3 w-28 rounded-full bg-muted/70" />
+          <Skeleton className="h-12 w-52 rounded-full bg-muted/80" />
+          <Skeleton className="h-4 w-full max-w-xl rounded-full bg-muted/70" />
+          <Skeleton className="h-4 w-4/5 max-w-lg rounded-full bg-muted/70" />
+        </div>
 
-        {/* Projects Grid Skeleton */}
-        <div className="grid gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="border-border/40 bg-card/50 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <Skeleton className="h-6 w-1/3" />
-                  <div className="flex gap-1">
-                    <Skeleton className="h-8 w-8 rounded-md" />
-                    <Skeleton className="h-8 w-8 rounded-md" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 mb-3">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                  <Skeleton className="h-5 w-20 rounded-full" />
-                </div>
-              </CardContent>
-            </Card>
+        <div className="grid gap-5 md:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="relative">
+              <div className="absolute right-4 top-4 z-10 flex gap-2">
+                <Skeleton className="h-9 w-9 rounded-full bg-muted/75" />
+                <Skeleton className="h-9 w-9 rounded-full bg-muted/75" />
+              </div>
+
+              <GradientFrame className="h-full">
+                <Card className="h-full overflow-hidden rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none">
+                  <Skeleton className="aspect-[16/10] w-full rounded-none bg-muted/75" />
+                  <CardHeader className="pb-3">
+                    <Skeleton className="h-7 w-40 rounded-full bg-muted/80" />
+                  </CardHeader>
+                  <CardContent className="pb-6">
+                    <div className="mb-4 space-y-2">
+                      <Skeleton className="h-4 w-full rounded-full bg-muted/70" />
+                      <Skeleton className="h-4 w-5/6 rounded-full bg-muted/70" />
+                      <Skeleton className="h-4 w-2/3 rounded-full bg-muted/70" />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Skeleton className="h-6 w-16 rounded-full bg-muted/75" />
+                      <Skeleton className="h-6 w-14 rounded-full bg-muted/75" />
+                      <Skeleton className="h-6 w-20 rounded-full bg-muted/75" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </GradientFrame>
+            </div>
           ))}
         </div>
       </div>
