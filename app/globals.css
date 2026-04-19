@@ -206,3 +206,85 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes fade-up-soft {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes glow-in-soft {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes blur-reveal-soft {
+  from {
+    opacity: 0;
+    filter: blur(14px);
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes text-flip-in {
+  from {
+    opacity: 0;
+    transform: rotateX(-88deg) translateY(16px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: rotateX(0deg) translateY(0);
+    filter: blur(0);
+  }
+}
+
+@layer utilities {
+  .animate-fade-up-soft {
+    animation: fade-up-soft 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-glow-in-soft {
+    animation: glow-in-soft 0.9s ease-out both;
+  }
+
+  .animate-blur-reveal-soft {
+    animation: blur-reveal-soft 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-text-flip-in {
+    animation: text-flip-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-180 {
+    animation-delay: 180ms;
+  }
+
+  .delay-260 {
+    animation-delay: 260ms;
+  }
+
+  .delay-340 {
+    animation-delay: 340ms;
+  }
+}

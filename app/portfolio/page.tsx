@@ -84,12 +84,17 @@ export default async function PortfolioPage() {
 
         {projects && projects.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
-            {projects.map((project) => {
+            {projects.map((project, index) => {
               const liveUrl = normalizeExternalUrl(project.live_url);
               const repoUrl = normalizeExternalUrl(project.repo_url);
+              const delayClass =
+                index % 4 === 0 ? "" :
+                index % 4 === 1 ? " delay-100" :
+                index % 4 === 2 ? " delay-180" :
+                " delay-260";
 
               return (
-              <div key={project.id} className="group relative">
+              <div key={project.id} className={`group relative animate-fade-up-soft${delayClass}`}>
                 <Link href={`/portfolio/${project.slug || project.id}`} className="block h-full">
                   <GradientFrame className="h-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_80px_rgba(0,0,0,0.14)]">
                     <Card className="h-full overflow-hidden rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">

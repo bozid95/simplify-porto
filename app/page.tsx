@@ -8,6 +8,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Spotlight } from "@/components/ui/spotlight";
 import { GradientFrame } from "@/components/ui/gradient-frame";
 import { Card3D } from "@/components/ui/card-3d";
+import { TextFlip } from "@/components/ui/text-flip";
+import { TextScramble } from "@/components/ui/text-scramble";
 
 // SVG Icons as components
 function GithubIcon() {
@@ -180,13 +182,24 @@ export default async function Home() {
                   </div>
 
                   <div className="space-y-1.5 [transform:translateZ(50px)]">
-                  <h1 className="text-[1.7rem] font-semibold tracking-tight sm:text-[1.85rem]">{name}</h1>
-                  <p className="text-sm font-medium text-muted-foreground/90">{tagline}</p>
-                </div>
+                    <TextFlip
+                      text={name}
+                      as="h1"
+                      delay={80}
+                      className="text-[1.7rem] font-semibold tracking-tight sm:text-[1.85rem]"
+                    />
+                    <p className="animate-fade-up-soft delay-100 text-sm font-medium text-muted-foreground/90">
+                      {tagline}
+                    </p>
+                  </div>
 
-                  <p className="max-w-sm text-sm leading-6 text-muted-foreground [transform:translateZ(40px)]">
-                    {bio}
-                  </p>
+                  <TextScramble
+                    text={bio}
+                    as="p"
+                    className="max-w-sm text-sm leading-6 text-muted-foreground [transform:translateZ(40px)]"
+                    duration={700}
+                    delay={170}
+                  />
                 </div>
 
                 <Separator className="w-full opacity-60" />
@@ -194,7 +207,7 @@ export default async function Home() {
                 <div className="grid gap-2.5 [transform:translateZ(35px)]">
                   <Button
                     variant="outline"
-                    className="group h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-3.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
+                    className="group animate-fade-up-soft animate-glow-in-soft delay-100 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-3.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
                     asChild
                   >
                     <Link href="/portfolio">
@@ -213,7 +226,7 @@ export default async function Home() {
 
                   <Button
                     variant="outline"
-                    className="group h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-3.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
+                    className="group animate-fade-up-soft animate-glow-in-soft delay-180 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-3.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
                     asChild
                   >
                     <Link href="/blog">
@@ -235,7 +248,7 @@ export default async function Home() {
                   <>
                     <Separator className="w-full opacity-60" />
 
-                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background/55 px-3 py-2.5 backdrop-blur-sm [transform:translateZ(30px)]">
+                    <div className="animate-fade-up-soft animate-glow-in-soft delay-260 flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background/55 px-3 py-2.5 backdrop-blur-sm [transform:translateZ(30px)]">
                       <p className="pl-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                         Connect
                       </p>

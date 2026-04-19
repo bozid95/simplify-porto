@@ -60,8 +60,15 @@ export default async function BlogPage() {
 
         {articles && articles.length > 0 ? (
           <div className="grid gap-3.5">
-            {articles.map((article) => (
-              <Link key={article.id} href={`/blog/${article.slug}`} className="group">
+            {articles.map((article, index) => {
+              const delayClass =
+                index % 4 === 0 ? "" :
+                index % 4 === 1 ? " delay-100" :
+                index % 4 === 2 ? " delay-180" :
+                " delay-260";
+
+              return (
+              <Link key={article.id} href={`/blog/${article.slug}`} className={`group animate-fade-up-soft${delayClass}`}>
                 <GradientFrame className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_70px_rgba(0,0,0,0.12)]">
                   <Card className="cursor-pointer rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
                     <CardHeader className="pb-2 pt-5">
@@ -99,7 +106,7 @@ export default async function BlogPage() {
                   </Card>
                 </GradientFrame>
               </Link>
-            ))}
+            )})}
           </div>
         ) : (
           <GradientFrame>
