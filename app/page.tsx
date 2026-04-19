@@ -87,6 +87,10 @@ interface SocialItem {
   external: boolean;
 }
 
+interface SocialItemCandidate extends Omit<SocialItem, "href"> {
+  href?: string;
+}
+
 export default async function Home() {
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -99,7 +103,7 @@ export default async function Home() {
   const bio = profile?.bio || "Hello! I build things on the internet.";
   const avatarUrl = profile?.avatar_url || "";
   const socialLinks: SocialLinks = (profile?.social_links as SocialLinks) || {};
-  const socialItems: SocialItem[] = [
+  const socialItemCandidates: SocialItemCandidate[] = [
     {
       href: socialLinks.github,
       label: "GitHub",
@@ -124,7 +128,10 @@ export default async function Home() {
       icon: <MailIcon />,
       external: false,
     },
-  ].filter((item): item is SocialItem => Boolean(item.href));
+  ];
+  const socialItems: SocialItem[] = socialItemCandidates.filter(
+    (item): item is SocialItem => Boolean(item.href)
+  );
 
   const initials = name
     .split(" ")
