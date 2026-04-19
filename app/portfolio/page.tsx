@@ -35,6 +35,12 @@ function GithubIcon() {
   );
 }
 
+function normalizeExternalUrl(url?: string | null) {
+  if (!url) return "";
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(url)) return url;
+  return `https://${url}`;
+}
+
 export default async function PortfolioPage() {
   const supabase = await createClient();
   const { data: projects } = await supabase
@@ -78,7 +84,11 @@ export default async function PortfolioPage() {
 
         {projects && projects.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
-            {projects.map((project) => (
+            {projects.map((project) => {
+              const liveUrl = normalizeExternalUrl(project.live_url);
+              const repoUrl = normalizeExternalUrl(project.repo_url);
+
+              return (
               <div key={project.id} className="group relative">
                 <Link href={`/portfolio/${project.slug || project.id}`} className="block h-full">
                   <GradientFrame className="h-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_80px_rgba(0,0,0,0.14)]">
@@ -122,33 +132,33 @@ export default async function PortfolioPage() {
                   </GradientFrame>
                 </Link>
                 <div className="absolute right-4 top-4 z-10 flex gap-2">
-                  {project.live_url && (
+                  {liveUrl && (
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-9 w-9 rounded-full border border-border/50 bg-background/75 backdrop-blur-md hover:bg-background"
                       asChild
                     >
-                      <a href={project.live_url} target="_blank" rel="noopener noreferrer">
+                      <a href={liveUrl} target="_blank" rel="noopener noreferrer">
                         <ExternalLinkIcon />
                       </a>
                     </Button>
                   )}
-                  {project.repo_url && (
+                  {repoUrl && (
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-9 w-9 rounded-full border border-border/50 bg-background/75 backdrop-blur-md hover:bg-background"
                       asChild
                     >
-                      <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
+                      <a href={repoUrl} target="_blank" rel="noopener noreferrer">
                         <GithubIcon />
                       </a>
                     </Button>
                   )}
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         ) : (
           <GradientFrame>

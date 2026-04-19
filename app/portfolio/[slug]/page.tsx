@@ -35,6 +35,12 @@ function GithubIcon() {
   );
 }
 
+function normalizeExternalUrl(url?: string | null) {
+  if (!url) return "";
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(url)) return url;
+  return `https://${url}`;
+}
+
 export default async function ProjectDetailPage({
   params,
 }: {
@@ -61,6 +67,9 @@ export default async function ProjectDetailPage({
   }
 
   if (!project) notFound();
+
+  const liveUrl = normalizeExternalUrl(project.live_url);
+  const repoUrl = normalizeExternalUrl(project.repo_url);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
@@ -112,17 +121,17 @@ export default async function ProjectDetailPage({
 
               <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap gap-2">
-                  {project.live_url && (
+                  {liveUrl && (
                     <Button size="sm" className="gap-2 rounded-full px-4" asChild>
-                      <a href={project.live_url} target="_blank" rel="noopener noreferrer">
+                      <a href={liveUrl} target="_blank" rel="noopener noreferrer">
                         <ExternalLinkIcon />
                         Visit Site
                       </a>
                     </Button>
                   )}
-                  {project.repo_url && (
+                  {repoUrl && (
                     <Button variant="outline" size="sm" className="gap-2 rounded-full px-4 bg-background/70" asChild>
-                      <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
+                      <a href={repoUrl} target="_blank" rel="noopener noreferrer">
                         <GithubIcon />
                         View Code
                       </a>
