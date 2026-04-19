@@ -8,8 +8,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Spotlight } from "@/components/ui/spotlight";
 import { GradientFrame } from "@/components/ui/gradient-frame";
 import { Card3D } from "@/components/ui/card-3d";
-import { TextFlip } from "@/components/ui/text-flip";
-import { TextScramble } from "@/components/ui/text-scramble";
 
 // SVG Icons as components
 function GithubIcon() {
@@ -182,24 +180,17 @@ export default async function Home() {
                   </div>
 
                   <div className="space-y-1.5 [transform:translateZ(50px)]">
-                    <TextFlip
-                      text={name}
-                      as="h1"
-                      delay={80}
-                      className="text-[1.7rem] font-semibold tracking-tight sm:text-[1.85rem]"
-                    />
-                    <p className="animate-fade-up-soft delay-100 text-sm font-medium text-muted-foreground/90">
+                    <h1 className="animate-fade-up-soft animate-glow-in-soft text-[1.7rem] font-semibold tracking-tight sm:text-[1.85rem]">
+                      {name}
+                    </h1>
+                    <p className="animate-fade-up-soft animate-glow-in-soft delay-100 text-sm font-medium text-muted-foreground/90">
                       {tagline}
                     </p>
                   </div>
 
-                  <TextScramble
-                    text={bio}
-                    as="p"
-                    className="max-w-sm text-sm leading-6 text-muted-foreground [transform:translateZ(40px)]"
-                    duration={700}
-                    delay={170}
-                  />
+                  <p className="animate-fade-up-soft animate-glow-in-soft delay-180 max-w-sm text-sm leading-6 text-muted-foreground [transform:translateZ(40px)]">
+                    {bio}
+                  </p>
                 </div>
 
                 <Separator className="w-full opacity-60" />
