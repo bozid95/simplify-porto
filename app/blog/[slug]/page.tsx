@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 import { ArticleContent } from "./article-content";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function ArrowLeftIcon() {
   return (
@@ -35,6 +36,10 @@ export default async function ArticlePage({
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute right-0 top-0 h-80 w-80 translate-x-1/4 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute left-0 top-1/3 h-96 w-96 -translate-x-1/4 rounded-full bg-muted-foreground/10 blur-3xl" />
+      </div>
+
+      <div className="absolute right-4 top-4 z-20">
+        <ThemeToggle />
       </div>
 
       <article className="relative mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">

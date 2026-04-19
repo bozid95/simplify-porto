@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spotlight } from "@/components/ui/spotlight";
 import { GradientFrame } from "@/components/ui/gradient-frame";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function ArrowLeftIcon() {
   return (
@@ -47,6 +48,10 @@ export default async function PortfolioPage() {
         <Spotlight className="left-0 top-0 h-72 w-72 -translate-x-1/3" fill="rgba(120,120,120,0.18)" />
         <Spotlight className="right-0 top-1/4 h-80 w-80 translate-x-1/4" fill="rgba(160,160,160,0.14)" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_35%)]" />
+      </div>
+
+      <div className="absolute right-4 top-4 z-20">
+        <ThemeToggle />
       </div>
 
       <div className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6">
