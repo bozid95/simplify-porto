@@ -107,14 +107,15 @@ export default function EditArticlePage() {
         </Link>
       </Button>
 
-      <h1 className="text-2xl font-bold tracking-tight mb-6">Edit Article</h1>
+      <p className="mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Publishing</p>
+      <h1 className="text-2xl font-semibold tracking-tight mb-6">Edit Article</h1>
 
       <form onSubmit={handleSave}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base">Article Details</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">Article Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -148,7 +149,7 @@ export default function EditArticlePage() {
 
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base">Content</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">Content</CardTitle>
               </CardHeader>
               <CardContent>
                 <div data-color-mode="dark">
@@ -166,7 +167,7 @@ export default function EditArticlePage() {
           <div className="space-y-6">
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base">Publishing</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">Publishing</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                  <div className="flex items-center gap-3">
@@ -195,7 +196,7 @@ export default function EditArticlePage() {
 
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base">Metadata</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">Metadata</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">

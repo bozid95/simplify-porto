@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Manrope } from "next/font/google";
+import { Manrope } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnalyticsTracker } from "@/components/analytics-tracker";
@@ -11,7 +11,7 @@ const geistSans = Manrope({
   subsets: ["latin"],
 });
 
-const geistMono = JetBrains_Mono({
+const geistMono = Manrope({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });

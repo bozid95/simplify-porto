@@ -150,7 +150,10 @@ export default function ArticlesPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Articles</h1>
+          <p className="mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Publishing
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">Articles</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Write and manage your blog posts
           </p>

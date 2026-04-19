@@ -54,11 +54,11 @@ export default async function PortfolioPage() {
         <ThemeToggle />
       </div>
 
-      <div className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      <div className="relative mx-auto max-w-5xl px-4 py-7 sm:px-6 sm:py-8">
         <Button
           variant="ghost"
           size="sm"
-          className="mb-8 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
+          className="mb-6 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
           asChild
         >
           <Link href="/">
@@ -67,17 +67,17 @@ export default async function PortfolioPage() {
           </Link>
         </Button>
 
-        <div className="mb-10 max-w-2xl">
-          <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="mb-8 max-w-2xl">
+          <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
             Selected Projects
           </p>
-          <h1 className="mb-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="mb-2 text-[1.9rem] font-semibold tracking-tight sm:text-[2.15rem]">
             Portfolio
           </h1>
         </div>
 
         {projects && projects.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {projects.map((project) => (
               <div key={project.id} className="group relative">
                 <Link href={`/portfolio/${project.slug || project.id}`} className="block h-full">
@@ -93,15 +93,15 @@ export default async function PortfolioPage() {
                           />
                         </div>
                       )}
-                      <CardHeader className="pb-3 flex-none">
+                      <CardHeader className="pb-2 flex-none">
                         <div className="flex items-start justify-between">
-                          <CardTitle className="text-xl font-semibold transition-colors group-hover:text-primary">
+                          <CardTitle className="text-lg font-semibold transition-colors group-hover:text-primary sm:text-[1.15rem]">
                             {project.title}
                           </CardTitle>
                         </div>
                       </CardHeader>
-                      <CardContent className="pb-6">
-                        <p className="mb-4 line-clamp-3 text-sm leading-7 text-muted-foreground">
+                      <CardContent className="pb-5">
+                        <p className="mb-3 line-clamp-3 text-sm leading-6 text-muted-foreground">
                           {project.description}
                         </p>
                         {project.tech_stack && project.tech_stack.length > 0 && (

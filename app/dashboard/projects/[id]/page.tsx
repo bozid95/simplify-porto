@@ -115,7 +115,8 @@ export default function EditProjectPage() {
         </Link>
       </Button>
 
-      <h1 className="text-2xl font-bold tracking-tight mb-6">Edit Project</h1>
+      <p className="mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Content</p>
+      <h1 className="text-2xl font-semibold tracking-tight mb-6">Edit Project</h1>
 
       <form onSubmit={handleSave}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -123,7 +124,7 @@ export default function EditProjectPage() {
           <div className="lg:col-span-2 space-y-6">
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base">Project Details</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">Project Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -158,7 +159,7 @@ export default function EditProjectPage() {
 
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base">Detailed Content</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">Detailed Content</CardTitle>
               </CardHeader>
               <CardContent>
                 <div data-color-mode="dark">
@@ -177,7 +178,7 @@ export default function EditProjectPage() {
           <div className="space-y-6">
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base">Publishing</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">Publishing</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                  <div className="space-y-2">
@@ -204,7 +205,7 @@ export default function EditProjectPage() {
 
              <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base">Metadata</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">Metadata</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -231,7 +232,7 @@ export default function EditProjectPage() {
 
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base">Links</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">Links</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">

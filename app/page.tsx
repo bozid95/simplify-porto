@@ -153,7 +153,7 @@ export default async function Home() {
         <ThemeToggle />
       </div>
 
-      <div className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 sm:py-14">
+      <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
         <Card3D className="w-full max-w-lg">
           <GradientFrame className="w-full max-w-lg">
             <Card className="relative w-full overflow-hidden rounded-[calc(2rem-1px)] border-0 bg-card/75 py-0 shadow-none">
@@ -161,14 +161,14 @@ export default async function Home() {
               <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_32%,transparent_65%,rgba(255,255,255,0.1))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_32%,transparent_65%,rgba(255,255,255,0.04))]" />
               <Spotlight className="-left-8 top-8 h-40 w-40" fill="rgba(255,255,255,0.16)" />
 
-              <CardContent className="relative flex flex-col gap-7 px-6 py-7 sm:px-8 sm:py-8">
+              <CardContent className="relative flex flex-col gap-5 px-5 py-6 sm:px-7 sm:py-7">
                 <div className="flex items-start justify-between gap-4 [transform:translateZ(30px)]">
-                <div className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground backdrop-blur">
+                <div className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground backdrop-blur">
                   Portfolio & Notes
                 </div>
               </div>
 
-                <div className="flex flex-col items-center gap-5 text-center">
+                <div className="flex flex-col items-center gap-4 text-center">
                   <div className="relative [transform:translateZ(60px)]">
                     <div className="absolute inset-0 rounded-full bg-primary/15 blur-xl" />
                     <Avatar className="relative h-24 w-24 border border-border/60 ring-4 ring-background/80 shadow-lg">
@@ -179,22 +179,22 @@ export default async function Home() {
                     </Avatar>
                   </div>
 
-                  <div className="space-y-2 [transform:translateZ(50px)]">
-                  <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">{name}</h1>
-                  <p className="text-sm font-medium text-muted-foreground/90 sm:text-[15px]">{tagline}</p>
+                  <div className="space-y-1.5 [transform:translateZ(50px)]">
+                  <h1 className="text-[1.7rem] font-semibold tracking-tight sm:text-[1.85rem]">{name}</h1>
+                  <p className="text-sm font-medium text-muted-foreground/90">{tagline}</p>
                 </div>
 
-                  <p className="max-w-sm text-sm leading-7 text-muted-foreground sm:text-[15px] [transform:translateZ(40px)]">
+                  <p className="max-w-sm text-sm leading-6 text-muted-foreground [transform:translateZ(40px)]">
                     {bio}
                   </p>
                 </div>
 
                 <Separator className="w-full opacity-60" />
 
-                <div className="grid gap-3 [transform:translateZ(35px)]">
+                <div className="grid gap-2.5 [transform:translateZ(35px)]">
                   <Button
                     variant="outline"
-                    className="group h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-4 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
+                    className="group h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-3.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
                     asChild
                   >
                     <Link href="/portfolio">
@@ -213,7 +213,7 @@ export default async function Home() {
 
                   <Button
                     variant="outline"
-                    className="group h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-4 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
+                    className="group h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-3.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
                     asChild
                   >
                     <Link href="/blog">
@@ -235,7 +235,7 @@ export default async function Home() {
                   <>
                     <Separator className="w-full opacity-60" />
 
-                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background/55 px-3 py-3 backdrop-blur-sm [transform:translateZ(30px)]">
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background/55 px-3 py-2.5 backdrop-blur-sm [transform:translateZ(30px)]">
                       <p className="pl-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                         Connect
                       </p>

@@ -106,12 +106,15 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold tracking-tight mb-6">Edit Profile</h1>
+      <p className="mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        Profile
+      </p>
+      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Edit Profile</h1>
       <form onSubmit={handleSave} className="space-y-6">
         {/* Basic Info */}
         <Card className="border-border/40">
           <CardHeader>
-            <CardTitle className="text-base">Basic Information</CardTitle>
+            <CardTitle className="text-base font-semibold tracking-tight">Basic Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -155,7 +158,7 @@ export default function ProfilePage() {
         {/* Social Links */}
         <Card className="border-border/40">
           <CardHeader>
-            <CardTitle className="text-base">Social Links</CardTitle>
+            <CardTitle className="text-base font-semibold tracking-tight">Social Links</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

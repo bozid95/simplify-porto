@@ -39,7 +39,10 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm border-border/40">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Login</CardTitle>
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Dashboard Access
+          </p>
+          <CardTitle className="text-2xl font-semibold tracking-tight">Login</CardTitle>
           <p className="text-sm text-muted-foreground">
             Sign in to manage your portfolio
           </p>

@@ -42,11 +42,11 @@ export default async function ArticlePage({
         <ThemeToggle />
       </div>
 
-      <article className="relative mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+      <article className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-9">
         <Button
           variant="ghost"
           size="sm"
-          className="mb-8 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
+          className="mb-6 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
           asChild
         >
           <Link href="/blog">
@@ -56,9 +56,9 @@ export default async function ArticlePage({
         </Button>
 
         <Card className="rounded-[2rem] border-border/50 bg-card/75 py-0 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl">
-          <CardContent className="px-6 py-8 sm:px-8 sm:py-10">
-            <header className="mb-10">
-              <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <CardContent className="px-5 py-6 sm:px-7 sm:py-8">
+            <header className="mb-8">
+              <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                 Article
               </p>
               <time className="inline-flex rounded-full border border-border/50 bg-background/70 px-3 py-1 text-[11px] font-medium text-muted-foreground">
@@ -68,7 +68,7 @@ export default async function ArticlePage({
                   year: "numeric",
                 })}
               </time>
-              <h1 className="mt-4 mb-5 text-3xl font-semibold tracking-tight sm:text-4xl">
+              <h1 className="mt-3 mb-4 text-[1.9rem] font-semibold tracking-tight sm:text-[2.2rem]">
                 {article.title}
               </h1>
               {article.tags?.length > 0 && (

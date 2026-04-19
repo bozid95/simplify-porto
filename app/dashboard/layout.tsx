@@ -264,7 +264,7 @@ export default function DashboardLayout({
         </main>
         
         {/* Footer */}
-        <footer className="border-t border-border/40 py-6 px-4 md:px-8 text-center text-sm text-muted-foreground">
+        <footer className="border-t border-border/40 py-6 px-4 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground md:px-8">
            &copy; {new Date().getFullYear()} Porto CMS. All rights reserved.
         </footer>
       </div>

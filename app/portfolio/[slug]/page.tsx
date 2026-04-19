@@ -73,11 +73,11 @@ export default async function ProjectDetailPage({
         <ThemeToggle />
       </div>
 
-      <article className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+      <article className="relative mx-auto max-w-5xl px-4 py-7 sm:px-6 sm:py-9">
         <Button
           variant="ghost"
           size="sm"
-          className="mb-8 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
+          className="mb-6 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
           asChild
         >
           <Link href="/portfolio">
@@ -98,19 +98,19 @@ export default async function ProjectDetailPage({
             </div>
           )}
 
-          <CardContent className="px-6 py-8 sm:px-8 sm:py-10">
-            <header className="mb-8 md:mb-10">
-              <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <CardContent className="px-5 py-6 sm:px-7 sm:py-8">
+            <header className="mb-7 md:mb-8">
+              <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                 Project Overview
               </p>
-              <h1 className="mb-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+              <h1 className="mb-3 text-[1.9rem] font-semibold tracking-tight sm:text-[2.2rem]">
                 {project.title}
               </h1>
-              <p className="mb-8 max-w-3xl text-base leading-8 text-muted-foreground sm:text-lg">
+              <p className="mb-6 max-w-3xl text-[15px] leading-7 text-muted-foreground sm:text-base">
                 {project.description}
               </p>
 
-              <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap gap-2">
                   {project.live_url && (
                     <Button size="sm" className="gap-2 rounded-full px-4" asChild>
@@ -132,7 +132,7 @@ export default async function ProjectDetailPage({
               </div>
 
               <div className="space-y-3">
-                <h3 className="font-mono text-sm font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                <h3 className="text-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
                   Tech Stack
                 </h3>
                 {project.tech_stack?.length > 0 && (

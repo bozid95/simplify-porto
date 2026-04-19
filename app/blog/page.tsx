@@ -36,11 +36,11 @@ export default async function BlogPage() {
         <ThemeToggle />
       </div>
 
-      <div className="relative mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <div className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-8">
         <Button
           variant="ghost"
           size="sm"
-          className="mb-8 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
+          className="mb-6 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
           asChild
         >
           <Link href="/">
@@ -49,24 +49,24 @@ export default async function BlogPage() {
           </Link>
         </Button>
 
-        <div className="mb-10 max-w-2xl">
-          <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="mb-8 max-w-2xl">
+          <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
             Writing & Notes
           </p>
-          <h1 className="mb-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="mb-2 text-[1.9rem] font-semibold tracking-tight sm:text-[2.15rem]">
             Blog
           </h1>
         </div>
 
         {articles && articles.length > 0 ? (
-          <div className="grid gap-4">
+          <div className="grid gap-3.5">
             {articles.map((article) => (
               <Link key={article.id} href={`/blog/${article.slug}`} className="group">
                 <GradientFrame className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_70px_rgba(0,0,0,0.12)]">
                   <Card className="cursor-pointer rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
-                    <CardHeader className="pb-3 pt-6">
+                    <CardHeader className="pb-2 pt-5">
                       <div className="flex items-start justify-between gap-4">
-                        <CardTitle className="text-xl font-semibold transition-colors group-hover:text-primary">
+                        <CardTitle className="text-lg font-semibold transition-colors group-hover:text-primary sm:text-[1.15rem]">
                           {article.title}
                         </CardTitle>
                         <span className="shrink-0 rounded-full border border-border/50 bg-background/70 px-3 py-1 text-[11px] font-medium text-muted-foreground">
@@ -78,8 +78,8 @@ export default async function BlogPage() {
                         </span>
                       </div>
                     </CardHeader>
-                    <CardContent className="pb-6">
-                      <p className="mb-4 text-sm leading-7 text-muted-foreground">
+                    <CardContent className="pb-5">
+                      <p className="mb-3 text-sm leading-6 text-muted-foreground">
                         {article.excerpt}
                       </p>
                       {article.tags && article.tags.length > 0 && (
