@@ -213,18 +213,20 @@ export default async function Home() {
                 <div className="grid gap-2.5 [transform:translateZ(35px)]">
                   <Button
                     variant="outline"
-                    className="group animate-fade-up-soft animate-glow-in-soft delay-100 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-3.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
+                    className="group animate-fade-up-soft animate-glow-in-soft delay-100 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-3 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3.5"
                     asChild
                   >
-                    <Link href="/portfolio">
-                      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-foreground">
+                    <Link href="/portfolio" className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-foreground sm:h-11 sm:w-11">
                         <FolderIcon />
                       </span>
-                      <span className="flex flex-1 flex-col items-start">
+                      <span className="flex min-w-0 flex-1 flex-col items-start">
                         <span className="text-sm font-semibold">Portfolio</span>
-                        <span className="text-xs font-normal text-muted-foreground">Selected work, case studies, and experiments</span>
+                        <span className="text-xs font-normal leading-5 text-muted-foreground">
+                          Selected work, case studies, and experiments
+                        </span>
                       </span>
-                      <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                      <span className="shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                         <ArrowUpRightIcon />
                       </span>
                     </Link>
@@ -232,18 +234,20 @@ export default async function Home() {
 
                   <Button
                     variant="outline"
-                    className="group animate-fade-up-soft animate-glow-in-soft delay-180 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-4 py-3.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg"
+                    className="group animate-fade-up-soft animate-glow-in-soft delay-180 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-3 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3.5"
                     asChild
                   >
-                    <Link href="/blog">
-                      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-foreground">
+                    <Link href="/blog" className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-foreground sm:h-11 sm:w-11">
                         <PenIcon />
                       </span>
-                      <span className="flex flex-1 flex-col items-start">
+                      <span className="flex min-w-0 flex-1 flex-col items-start">
                         <span className="text-sm font-semibold">Blog</span>
-                        <span className="text-xs font-normal text-muted-foreground">Notes, writing, and things worth sharing</span>
+                        <span className="text-xs font-normal leading-5 text-muted-foreground">
+                          Notes, writing, and things worth sharing
+                        </span>
                       </span>
-                      <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                      <span className="shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                         <ArrowUpRightIcon />
                       </span>
                     </Link>
@@ -254,17 +258,17 @@ export default async function Home() {
                   <>
                     <Separator className="w-full opacity-60" />
 
-                    <div className="animate-fade-up-soft animate-glow-in-soft delay-260 flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background/55 px-3 py-2.5 backdrop-blur-sm [transform:translateZ(30px)]">
-                      <p className="pl-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    <div className="animate-fade-up-soft animate-glow-in-soft delay-260 flex items-center justify-between gap-2 rounded-2xl border border-border/60 bg-background/55 px-2.5 py-2.5 backdrop-blur-sm sm:gap-3 sm:px-3 [transform:translateZ(30px)]">
+                      <p className="shrink-0 pl-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                         Connect
                       </p>
-                      <div className="flex flex-wrap justify-end gap-2">
+                      <div className="flex min-w-0 flex-nowrap justify-end gap-1.5 sm:gap-2">
                         {socialItems.map((item) => (
                           <Button
                             key={item.label}
                             variant="ghost"
                             size="icon"
-                            className="h-10 w-10 rounded-full border border-transparent bg-background/70 transition-all hover:border-border hover:bg-background"
+                            className="h-9 w-9 shrink-0 rounded-full border border-transparent bg-background/70 transition-all hover:border-border hover:bg-background sm:h-10 sm:w-10"
                             asChild
                           >
                             <a
