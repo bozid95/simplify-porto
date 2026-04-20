@@ -19,6 +19,11 @@ const geistMono = Manrope({
 export const metadata: Metadata = {
   title: "Portfolio",
   description: "Personal portfolio & blog",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
