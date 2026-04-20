@@ -14,6 +14,7 @@ interface SocialLinks {
   github: string;
   linkedin: string;
   twitter: string;
+  threads: string;
   email: string;
 }
 
@@ -39,13 +40,19 @@ export default function ProfilePage() {
     const supabase = createClient();
     const { data } = await supabase.from("profiles").select("*").single();
     if (data) {
+      const defaultSocialLinks: SocialLinks = {
+        github: "",
+        linkedin: "",
+        twitter: "",
+        threads: "",
+        email: "",
+      };
+
       setProfile({
         ...data,
-        social_links: data.social_links || {
-          github: "",
-          linkedin: "",
-          twitter: "",
-          email: "",
+        social_links: {
+          ...defaultSocialLinks,
+          ...(data.social_links || {}),
         },
       });
     }
@@ -186,6 +193,15 @@ export default function ProfilePage() {
                 value={profile.social_links.twitter}
                 onChange={(e) => updateSocialLink("twitter", e.target.value)}
                 placeholder="https://twitter.com/username"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="threads">Threads</Label>
+              <Input
+                id="threads"
+                value={profile.social_links.threads}
+                onChange={(e) => updateSocialLink("threads", e.target.value)}
+                placeholder="https://threads.net/@username"
               />
             </div>
             <div className="space-y-2">
