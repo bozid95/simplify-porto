@@ -54,6 +54,7 @@ export default async function ProjectDetailPage({
     .from("projects")
     .select("*")
     .eq("slug", slug)
+    .eq("visibility", "public")
     .single();
 
   // If not found, and slug looks like a UUID, try to find by ID
@@ -62,6 +63,7 @@ export default async function ProjectDetailPage({
         .from("projects")
         .select("*")
         .eq("id", slug)
+        .eq("visibility", "public")
         .single();
      project = projectById;
   }

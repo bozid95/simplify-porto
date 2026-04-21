@@ -46,6 +46,7 @@ export default async function PortfolioPage() {
   const { data: projects } = await supabase
     .from("projects")
     .select("*")
+    .eq("visibility", "public")
     .order("sort_order", { ascending: true });
 
   return (

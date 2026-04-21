@@ -18,11 +18,14 @@ create table if not exists profiles (
 create table if not exists projects (
   id uuid primary key default gen_random_uuid(),
   title text not null,
+  slug text unique,
   description text default '',
+  content text default '',
   image_url text default '',
   tech_stack text[] default '{}',
   live_url text default '',
   repo_url text default '',
+  visibility text not null default 'draft' check (visibility in ('draft', 'public')),
   sort_order int default 0,
   created_at timestamptz default now()
 );
@@ -57,7 +60,7 @@ alter table articles enable row level security;
 
 -- Public read policies
 create policy "Public can read profiles" on profiles for select using (true);
-create policy "Public can read projects" on projects for select using (true);
+create policy "Public can read public projects" on projects for select using (visibility = 'public');
 create policy "Public can read published articles" on articles for select using (published = true);
 
 -- Authenticated user write policies

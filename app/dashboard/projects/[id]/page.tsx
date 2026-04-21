@@ -10,10 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
+type ProjectVisibility = "draft" | "public";
 
 function ArrowLeftIcon() {
   return (
@@ -39,6 +41,7 @@ export default function EditProjectPage() {
     tech_stack: "",
     live_url: "",
     repo_url: "",
+    visibility: "draft" as ProjectVisibility,
     sort_order: 0,
   });
 
@@ -55,6 +58,7 @@ export default function EditProjectPage() {
         tech_stack: (data.tech_stack || []).join(", "),
         live_url: data.live_url || "",
         repo_url: data.repo_url || "",
+        visibility: (data.visibility || "draft") as ProjectVisibility,
         sort_order: data.sort_order || 0,
       });
     }
@@ -62,7 +66,11 @@ export default function EditProjectPage() {
   }, [id]);
 
   useEffect(() => {
-    loadProject();
+    const timeoutId = window.setTimeout(() => {
+      void loadProject();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [loadProject]);
 
   async function handleSave(e: React.FormEvent) {
@@ -85,6 +93,7 @@ export default function EditProjectPage() {
         tech_stack: techStack,
         live_url: form.live_url,
         repo_url: form.repo_url,
+        visibility: form.visibility,
         sort_order: form.sort_order,
       })
       .eq("id", id);
@@ -181,6 +190,23 @@ export default function EditProjectPage() {
                 <CardTitle className="text-base font-semibold tracking-tight">Publishing</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Tabs
+                    value={form.visibility}
+                    onValueChange={(value) =>
+                      setForm({ ...form, visibility: value as ProjectVisibility })
+                    }
+                  >
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="draft">Draft</TabsTrigger>
+                      <TabsTrigger value="public">Public</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <p className="text-xs text-muted-foreground">
+                    Only public projects are shown on the public portfolio page.
+                  </p>
+                </div>
                  <div className="space-y-2">
                   <Label htmlFor="sort_order">Sort Order</Label>
                   <Input
