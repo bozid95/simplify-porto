@@ -255,6 +255,15 @@
   }
 }
 
+@keyframes logo-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 @layer utilities {
   .animate-fade-up-soft {
     animation: fade-up-soft 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
@@ -99,19 +100,72 @@ interface SocialItemCandidate extends Omit<SocialItem, "href"> {
   href?: string;
 }
 
+interface ProjectStackSource {
+  tech_stack?: string[] | null;
+}
+
+interface StackLogoItem {
+  name: string;
+  slug: string;
+  color?: string;
+}
+
+const stackLogoMap: Record<string, StackLogoItem> = {
+  nextjs: { name: "Next.js", slug: "nextdotjs", color: "FFFFFF" },
+  next: { name: "Next.js", slug: "nextdotjs", color: "FFFFFF" },
+  react: { name: "React", slug: "react", color: "61DAFB" },
+  typescript: { name: "TypeScript", slug: "typescript", color: "3178C6" },
+  ts: { name: "TypeScript", slug: "typescript", color: "3178C6" },
+  javascript: { name: "JavaScript", slug: "javascript", color: "F7DF1E" },
+  js: { name: "JavaScript", slug: "javascript", color: "F7DF1E" },
+  tailwindcss: { name: "Tailwind CSS", slug: "tailwindcss", color: "06B6D4" },
+  tailwind: { name: "Tailwind CSS", slug: "tailwindcss", color: "06B6D4" },
+  supabase: { name: "Supabase", slug: "supabase", color: "3ECF8E" },
+  postgresql: { name: "PostgreSQL", slug: "postgresql", color: "4169E1" },
+  postgres: { name: "PostgreSQL", slug: "postgresql", color: "4169E1" },
+  nodejs: { name: "Node.js", slug: "nodedotjs", color: "5FA04E" },
+  node: { name: "Node.js", slug: "nodedotjs", color: "5FA04E" },
+  nest: { name: "NestJS", slug: "nestjs", color: "E0234E" },
+  nestjs: { name: "NestJS", slug: "nestjs", color: "E0234E" },
+  express: { name: "Express", slug: "express", color: "FFFFFF" },
+  mongodb: { name: "MongoDB", slug: "mongodb", color: "47A248" },
+  redis: { name: "Redis", slug: "redis", color: "FF4438" },
+  prisma: { name: "Prisma", slug: "prisma", color: "2D3748" },
+  framermotion: { name: "Framer Motion", slug: "framer", color: "0055FF" },
+  framer: { name: "Framer Motion", slug: "framer", color: "0055FF" },
+  firebase: { name: "Firebase", slug: "firebase", color: "FFCA28" },
+  vercel: { name: "Vercel", slug: "vercel", color: "FFFFFF" },
+  github: { name: "GitHub", slug: "github", color: "FFFFFF" },
+  figma: { name: "Figma", slug: "figma", color: "F24E1E" },
+  docker: { name: "Docker", slug: "docker", color: "2496ED" },
+  graphql: { name: "GraphQL", slug: "graphql", color: "E10098" },
+  laravel: { name: "Laravel", slug: "laravel", color: "FF2D20" },
+  php: { name: "PHP", slug: "php", color: "777BB4" },
+  go: { name: "Go", slug: "go", color: "00ADD8" },
+};
+
+function normalizeTechKey(label: string) {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function resolveStackLogo(label: string): StackLogoItem | null {
+  return stackLogoMap[normalizeTechKey(label)] ?? null;
+}
+
 export default async function Home() {
   const supabase = await createClient();
   const [
     { data: profile },
     { data: featuredProject },
     { data: latestArticle },
+    { data: stackProjects },
     { count: totalProjects },
     { count: totalArticles },
   ] = await Promise.all([
     supabase.from("profiles").select("*").single(),
     supabase
       .from("projects")
-      .select("id, slug, title, description, tech_stack, live_url")
+      .select("id, slug, title, description")
       .eq("visibility", "public")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
@@ -119,11 +173,18 @@ export default async function Home() {
       .maybeSingle(),
     supabase
       .from("articles")
-      .select("id, slug, title, excerpt, tags, created_at")
+      .select("slug, title, excerpt")
       .eq("published", true)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("projects")
+      .select("tech_stack")
+      .eq("visibility", "public")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .limit(18),
     supabase
       .from("projects")
       .select("*", { count: "exact", head: true })
@@ -179,6 +240,33 @@ export default async function Home() {
   const socialItems: SocialItem[] = socialItemCandidates.filter(
     (item): item is SocialItem => Boolean(item.href)
   );
+  const stackCloud = Array.from(
+    ((stackProjects as ProjectStackSource[] | null) ?? []).reduce((map, project) => {
+      for (const rawTech of project.tech_stack ?? []) {
+        const tech = rawTech.trim();
+        if (!tech) continue;
+
+        map.set(tech, (map.get(tech) ?? 0) + 1);
+      }
+
+      return map;
+    }, new Map<string, number>())
+  )
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 10)
+    .map(([name]) => {
+      const resolved = resolveStackLogo(name);
+
+      return {
+        rawName: name,
+        displayName: resolved?.name ?? name,
+        logoUrl: resolved
+          ? `https://cdn.simpleicons.org/${resolved.slug}/${resolved.color ?? "currentColor"}`
+          : null,
+      };
+    })
+    .filter((item) => item.logoUrl);
+  const stackCloudLoop = stackCloud.length > 0 ? [...stackCloud, ...stackCloud] : [];
 
   const initials = name
     .split(" ")
@@ -196,16 +284,15 @@ export default async function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.14),_transparent_32%),linear-gradient(to_bottom,_transparent,_rgba(0,0,0,0.04))]" />
       </div>
 
-      <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
-        <Card3D className="w-full max-w-lg">
-          <GradientFrame className="w-full max-w-lg">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 sm:py-10">
+        <GradientFrame className="w-full max-w-lg">
             <Card className="relative w-full overflow-hidden rounded-[calc(2rem-1px)] border-0 bg-card/75 py-0 shadow-none">
               <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
               <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_32%,transparent_65%,rgba(255,255,255,0.1))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_32%,transparent_65%,rgba(255,255,255,0.04))]" />
               <Spotlight className="-left-8 top-8 h-40 w-40" fill="rgba(255,255,255,0.16)" />
 
               <CardContent className="relative flex flex-col gap-4 px-5 py-5 sm:px-6 sm:py-6">
-                <div className="flex items-start justify-between gap-4 [transform:translateZ(30px)]">
+                <div className="flex items-start justify-between gap-4">
                   <div className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground backdrop-blur">
                     Portfolio & Notes
                   </div>
@@ -213,17 +300,21 @@ export default async function Home() {
                 </div>
 
                 <div className="flex flex-col items-center gap-3 text-center">
-                  <div className="relative [transform:translateZ(60px)]">
-                    <div className="absolute inset-0 rounded-full bg-primary/15 blur-xl" />
-                    <Avatar className="relative h-20 w-20 border border-border/60 ring-4 ring-background/80 shadow-lg">
-                      <AvatarImage src={avatarUrl} alt={name} />
-                      <AvatarFallback className="bg-muted text-xl font-semibold">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
+                  <Card3D className="relative">
+                    <div className="relative rounded-full p-2">
+                      <div className="absolute inset-1 rounded-full bg-primary/15 blur-xl" />
+                      <div className="relative rounded-full border border-border/60 bg-background/55 p-1.5 shadow-[0_18px_50px_-24px_rgba(0,0,0,0.45)] backdrop-blur-sm [transform-style:preserve-3d]">
+                        <Avatar className="relative h-20 w-20 border border-border/60 ring-4 ring-background/80 shadow-lg [transform:translateZ(48px)]">
+                          <AvatarImage src={avatarUrl} alt={name} />
+                          <AvatarFallback className="bg-muted text-xl font-semibold">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                    </div>
+                  </Card3D>
 
-                  <div className="space-y-1.5 [transform:translateZ(50px)]">
+                  <div className="space-y-1.5">
                     <h1 className="animate-fade-up-soft animate-glow-in-soft text-[1.55rem] font-semibold tracking-tight sm:text-[1.7rem]">
                       {name}
                     </h1>
@@ -232,15 +323,49 @@ export default async function Home() {
                     </p>
                   </div>
 
-                  <p className="animate-fade-up-soft animate-glow-in-soft delay-180 line-clamp-3 max-w-sm text-sm leading-6 text-muted-foreground [transform:translateZ(40px)]">
+                  <p className="animate-fade-up-soft animate-glow-in-soft delay-180 line-clamp-3 max-w-sm text-sm leading-6 text-muted-foreground">
                     {bio}
                   </p>
-
                 </div>
 
-                <Separator className="w-full opacity-60" />
+                {stackCloud.length > 0 && (
+                  <div className="animate-fade-up-soft animate-glow-in-soft delay-260 relative overflow-hidden rounded-full border border-border/50 bg-background/35 px-2 py-1.5 backdrop-blur-sm">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-background/95 via-background/70 to-transparent" />
 
-                <div className="grid gap-2 [transform:translateZ(35px)]">
+                    <div
+                      className="flex w-max min-w-full items-center gap-2 hover:[animation-play-state:paused]"
+                      style={{
+                        animation: "logo-marquee 10s linear infinite",
+                      }}
+                    >
+                      {stackCloudLoop.map((tech, index) => (
+                        <div
+                          key={`${tech.rawName}-${index}`}
+                          className="group relative flex shrink-0 items-center gap-1.5 rounded-full px-1.5 py-1 text-muted-foreground transition-colors duration-300 hover:text-foreground"
+                        >
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full border border-border/50 bg-background/80">
+                            <Image
+                              src={tech.logoUrl ?? ""}
+                              alt={tech.displayName}
+                              width={12}
+                              height={12}
+                              className="h-[12px] w-[12px] object-contain opacity-90"
+                              unoptimized
+                            />
+                          </div>
+                          <span className="text-[11px] font-medium">
+                            {tech.displayName}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <Separator className="w-full opacity-50" />
+
+                <div className="grid gap-2">
                   <Button
                     variant="outline"
                     className="group animate-fade-up-soft animate-glow-in-soft delay-100 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-2.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3"
@@ -290,100 +415,79 @@ export default async function Home() {
                   </Button>
                 </div>
 
-                <div className="space-y-2 [transform:translateZ(25px)]">
-                  <div className="px-1">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                      Highlights
-                    </p>
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <Link href={featuredProjectHref} className="group animate-fade-up-soft animate-glow-in-soft delay-180 block h-full">
-                      <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/60 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/90 hover:shadow-lg">
-                        <div className="mb-1 flex items-center justify-between gap-3">
-                          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                            Featured Work
-                          </p>
-                          <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                            <ArrowUpRightIcon />
-                          </span>
-                        </div>
-                        <h2 className="mb-1 min-h-[2.5rem] text-sm font-semibold leading-5">
-                          {featuredProject?.title || "Explore the latest project"}
-                        </h2>
-                        <p className="line-clamp-2 min-h-[2.5rem] text-xs leading-5 text-muted-foreground">
-                          {featuredProject?.description || "A closer look at recent work, process, and outcome."}
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Link
+                    href={featuredProjectHref}
+                    className="group animate-fade-up-soft animate-glow-in-soft delay-180 block h-full"
+                  >
+                    <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/45 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/80 hover:shadow-[0_20px_40px_-28px_rgba(0,0,0,0.45)]">
+                      <div className="mb-1 flex items-center justify-between gap-3">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                          Featured Project
                         </p>
+                        <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                          <ArrowUpRightIcon />
+                        </span>
                       </div>
-                    </Link>
+                      <h2 className="mb-1 min-h-[2.5rem] text-sm font-semibold leading-5">
+                        {featuredProject?.title || "See the latest selected project"}
+                      </h2>
+                      <p className="line-clamp-2 min-h-[2.5rem] text-xs leading-5 text-muted-foreground">
+                        {featuredProject?.description || "A closer look at recent work, process, and outcomes."}
+                      </p>
+                    </div>
+                  </Link>
 
-                    <Link href={latestArticleHref} className="group animate-fade-up-soft animate-glow-in-soft delay-260 block h-full">
-                      <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/60 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/90 hover:shadow-lg">
-                        <div className="mb-1 flex items-center justify-between gap-3">
-                          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                            Latest Note
-                          </p>
-                          <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                            <ArrowUpRightIcon />
-                          </span>
-                        </div>
-                        <h2 className="mb-1 min-h-[2.5rem] text-sm font-semibold leading-5">
-                          {latestArticle?.title || "Read the latest writing"}
-                        </h2>
-                        <p className="line-clamp-2 min-h-[2.5rem] text-xs leading-5 text-muted-foreground">
-                          {latestArticle?.excerpt || "Thoughts, notes, and things worth sharing from recent work."}
+                  <Link
+                    href={latestArticleHref}
+                    className="group animate-fade-up-soft animate-glow-in-soft delay-260 block h-full"
+                  >
+                    <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/45 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/80 hover:shadow-[0_20px_40px_-28px_rgba(0,0,0,0.45)]">
+                      <div className="mb-1 flex items-center justify-between gap-3">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                          Latest Note
                         </p>
+                        <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                          <ArrowUpRightIcon />
+                        </span>
                       </div>
-                    </Link>
-                  </div>
+                      <h2 className="mb-1 min-h-[2.5rem] text-sm font-semibold leading-5">
+                        {latestArticle?.title || "Read the latest note"}
+                      </h2>
+                      <p className="line-clamp-2 min-h-[2.5rem] text-xs leading-5 text-muted-foreground">
+                        {latestArticle?.excerpt || "Thoughts, notes, and things worth sharing from recent work."}
+                      </p>
+                    </div>
+                  </Link>
                 </div>
 
                 {socialItems.length > 0 && (
-                  <>
-                    <Separator className="w-full opacity-60" />
-
-                    <div className="animate-fade-up-soft animate-glow-in-soft delay-260 rounded-2xl border border-border/60 bg-background/55 p-3 backdrop-blur-sm [transform:translateZ(30px)]">
-                      <div className="mb-2 flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="mb-0.5 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                            Connect
-                          </p>
-                          <p className="truncate text-sm font-semibold">Open to collaborations.</p>
-                        </div>
-                        {emailHref && (
-                          <Button size="sm" className="h-8 shrink-0 rounded-full px-3 text-xs" asChild>
-                            <a href={emailHref}>Email Me</a>
-                          </Button>
-                        )}
-                      </div>
-
-                      <div className="flex min-w-0 flex-wrap gap-1.5">
-                        {socialItems.map((item) => (
-                          <Button
-                            key={item.label}
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-full border border-transparent bg-background/70 transition-all hover:border-border hover:bg-background"
-                            asChild
-                          >
-                            <a
-                              href={item.href}
-                              target={item.external ? "_blank" : undefined}
-                              rel={item.external ? "noopener noreferrer" : undefined}
-                              aria-label={item.label}
-                              title={item.label}
-                            >
-                              {item.icon}
-                            </a>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  </>
+                  <div className="animate-fade-up-soft animate-glow-in-soft delay-260 flex items-center justify-center gap-1.5">
+                    {socialItems.map((item) => (
+                      <Button
+                        key={item.label}
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full border border-transparent bg-background/45 text-muted-foreground transition-all hover:border-border/70 hover:bg-background/70 hover:text-foreground"
+                        asChild
+                      >
+                        <a
+                          href={item.href}
+                          target={item.external ? "_blank" : undefined}
+                          rel={item.external ? "noopener noreferrer" : undefined}
+                          aria-label={item.label}
+                          title={item.label}
+                        >
+                          {item.icon}
+                        </a>
+                      </Button>
+                    ))}
+                  </div>
                 )}
               </CardContent>
             </Card>
           </GradientFrame>
-        </Card3D>
+
       </div>
     </div>
   );
