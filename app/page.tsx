@@ -111,9 +111,11 @@ interface StackLogoItem {
 }
 
 const stackLogoMap: Record<string, StackLogoItem> = {
-  nextjs: { name: "Next.js", slug: "nextdotjs", color: "FFFFFF" },
-  next: { name: "Next.js", slug: "nextdotjs", color: "FFFFFF" },
+  nextjs: { name: "Next.js", slug: "nextdotjs", color: "000000" },
+  next: { name: "Next.js", slug: "nextdotjs", color: "000000" },
   react: { name: "React", slug: "react", color: "61DAFB" },
+  vue: { name: "Vue.js", slug: "vuedotjs", color: "4FC08D" },
+  vuejs: { name: "Vue.js", slug: "vuedotjs", color: "4FC08D" },
   typescript: { name: "TypeScript", slug: "typescript", color: "3178C6" },
   ts: { name: "TypeScript", slug: "typescript", color: "3178C6" },
   javascript: { name: "JavaScript", slug: "javascript", color: "F7DF1E" },
@@ -142,6 +144,8 @@ const stackLogoMap: Record<string, StackLogoItem> = {
   laravel: { name: "Laravel", slug: "laravel", color: "FF2D20" },
   php: { name: "PHP", slug: "php", color: "777BB4" },
   go: { name: "Go", slug: "go", color: "00ADD8" },
+  golang: { name: "Go", slug: "go", color: "00ADD8" },
+  n8n: { name: "n8n", slug: "n8n", color: "EA4B71" },
 };
 
 function normalizeTechKey(label: string) {
@@ -246,25 +250,30 @@ export default async function Home() {
         const tech = rawTech.trim();
         if (!tech) continue;
 
-        map.set(tech, (map.get(tech) ?? 0) + 1);
+        const resolved = resolveStackLogo(tech);
+        const key = resolved?.slug ?? normalizeTechKey(tech);
+        const existing = map.get(key);
+
+        map.set(key, {
+          count: (existing?.count ?? 0) + 1,
+          rawName: existing?.rawName ?? tech,
+          displayName: resolved?.name ?? existing?.displayName ?? tech,
+          logoUrl: resolved
+            ? `https://cdn.simpleicons.org/${resolved.slug}/${resolved.color ?? "currentColor"}`
+            : existing?.logoUrl ?? null,
+        });
       }
 
       return map;
-    }, new Map<string, number>())
+    }, new Map<string, {
+      count: number;
+      rawName: string;
+      displayName: string;
+      logoUrl: string | null;
+    }>())
   )
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .slice(0, 10)
-    .map(([name]) => {
-      const resolved = resolveStackLogo(name);
-
-      return {
-        rawName: name,
-        displayName: resolved?.name ?? name,
-        logoUrl: resolved
-          ? `https://cdn.simpleicons.org/${resolved.slug}/${resolved.color ?? "currentColor"}`
-          : null,
-      };
-    })
+    .map(([, item]) => item)
+    .sort((a, b) => b.count - a.count || a.displayName.localeCompare(b.displayName))
     .filter((item) => item.logoUrl);
   const stackCloudLoop = stackCloud.length > 0 ? [...stackCloud, ...stackCloud] : [];
 
@@ -329,14 +338,14 @@ export default async function Home() {
                 </div>
 
                 {stackCloud.length > 0 && (
-                  <div className="animate-fade-up-soft animate-glow-in-soft delay-260 relative overflow-hidden rounded-full border border-border/50 bg-background/35 px-2 py-1.5 backdrop-blur-sm">
+                  <div className="animate-fade-up-soft animate-glow-in-soft delay-260 relative overflow-hidden rounded-full border border-border/35 bg-background/20 px-2 py-1 backdrop-blur-[2px] dark:border-white/10 dark:bg-white/5">
                     <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
                     <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-background/95 via-background/70 to-transparent" />
 
                     <div
                       className="flex w-max min-w-full items-center gap-2 hover:[animation-play-state:paused]"
                       style={{
-                        animation: "logo-marquee 10s linear infinite",
+                        animation: "logo-marquee 13s linear infinite",
                       }}
                     >
                       {stackCloudLoop.map((tech, index) => (
@@ -381,7 +390,7 @@ export default async function Home() {
                       <span className="flex min-w-0 flex-1 flex-col items-start">
                         <span className="min-w-0 text-sm font-semibold">Portfolio</span>
                         <span className="text-xs font-normal leading-5 text-muted-foreground">
-                          Selected work, case studies, and experiments
+                          Selected work and case studies
                         </span>
                       </span>
                       <span className="shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
@@ -405,7 +414,7 @@ export default async function Home() {
                       <span className="flex min-w-0 flex-1 flex-col items-start">
                         <span className="min-w-0 text-sm font-semibold">Blog</span>
                         <span className="text-xs font-normal leading-5 text-muted-foreground">
-                          Notes, writing, and things worth sharing
+                          Notes and writing
                         </span>
                       </span>
                       <span className="shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
@@ -468,7 +477,7 @@ export default async function Home() {
                         key={item.label}
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-full border border-transparent bg-background/45 text-muted-foreground transition-all hover:border-border/70 hover:bg-background/70 hover:text-foreground"
+                        className="h-8 w-8 rounded-full border border-transparent bg-background/30 text-muted-foreground/75 transition-all hover:border-border/60 hover:bg-background/55 hover:text-foreground"
                         asChild
                       >
                         <a
