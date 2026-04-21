@@ -87,13 +87,15 @@ export default function ArticlesPage() {
     }
 
     // Fetch view counts
-    const { data: analyticsData } = await supabase
-      .from("analytics")
-      .select("path");
+    const { data: analyticsSummaryData } = await supabase
+      .from("analytics_daily_path_summary")
+      .select("path, views");
       
     // Count views for each article
     const articlesWithViews = articlesData.map(article => {
-      const views = analyticsData?.filter(log => log.path.includes(`/blog/${article.slug}`)).length || 0;
+      const views = analyticsSummaryData?.reduce((total, row) => {
+        return row.path === `/blog/${article.slug}` ? total + row.views : total;
+      }, 0) || 0;
       return { ...article, views };
     });
 
@@ -102,7 +104,11 @@ export default function ArticlesPage() {
   }, []);
 
   useEffect(() => {
-    loadArticles();
+    const timeoutId = window.setTimeout(() => {
+      void loadArticles();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [loadArticles]);
 
   async function handleDelete(id: string) {

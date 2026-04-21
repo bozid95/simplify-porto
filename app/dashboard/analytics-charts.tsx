@@ -17,19 +17,53 @@ import {
   Cell,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { startOfDay, subDays, format } from "date-fns";
+import { format, startOfDay, subDays } from "date-fns";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
+type DailyTotalRow = {
+  summary_date: string;
+  views: number;
+  unique_visitors: number;
+};
+
+type PathSummaryRow = {
+  summary_date: string;
+  path: string;
+  views: number;
+};
+
+type DeviceSummaryRow = {
+  summary_date: string;
+  device_type: string;
+  views: number;
+};
+
+type ChartPoint = {
+  date: string;
+  views: number;
+};
+
+type NamedValue = {
+  name: string;
+  value: number;
+};
+
+type AnalyticsState = {
+  dailyViews: ChartPoint[];
+  topPages: NamedValue[];
+  devices: NamedValue[];
+  totalViews: number;
+  uniqueVisitors: number;
+  loading: boolean;
+};
+
+function formatChartDate(date: Date) {
+  return format(date, "MMM dd");
+}
+
 export function AnalyticsCharts() {
-  const [data, setData] = useState<{
-    dailyViews: any[];
-    topPages: any[];
-    devices: any[];
-    totalViews: number;
-    uniqueVisitors: number;
-    loading: boolean;
-  }>({
+  const [data, setData] = useState<AnalyticsState>({
     dailyViews: [],
     topPages: [],
     devices: [],
@@ -39,88 +73,100 @@ export function AnalyticsCharts() {
   });
 
   useEffect(() => {
-    async function fetchData() {
-      const supabase = createClient();
-      const startDate = subDays(startOfDay(new Date()), 29).toISOString();
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const supabase = createClient();
+          const startDate = subDays(startOfDay(new Date()), 29);
+          const startDateSql = format(startDate, "yyyy-MM-dd");
 
-      const { data: analytics, error } = await supabase
-        .from("analytics")
-        .select("*")
-        .gte("created_at", startDate);
+          const [
+            { data: dailyTotals, error: dailyTotalsError },
+            { data: pathRows, error: pathRowsError },
+            { data: deviceRows, error: deviceRowsError },
+          ] = await Promise.all([
+            supabase
+              .from("analytics_daily_totals")
+              .select("summary_date, views, unique_visitors")
+              .gte("summary_date", startDateSql)
+              .order("summary_date", { ascending: true }),
+            supabase
+              .from("analytics_daily_path_summary")
+              .select("summary_date, path, views")
+              .gte("summary_date", startDateSql),
+            supabase
+              .from("analytics_daily_device_summary")
+              .select("summary_date, device_type, views")
+              .gte("summary_date", startDateSql),
+          ]);
 
-      if (error || !analytics) {
-        console.error("Error fetching analytics", error);
-        setData((prev) => ({ ...prev, loading: false }));
-        return;
-      }
+          if (dailyTotalsError || pathRowsError || deviceRowsError) {
+            throw dailyTotalsError || pathRowsError || deviceRowsError;
+          }
 
-      // Process Daily Views
-      const dailyMap = new Map();
-      // Initialize last 30 days with 0
-      for (let i = 29; i >= 0; i--) {
-        const date = AppDate(subDays(new Date(), i));
-        dailyMap.set(date, 0);
-      }
-      
-      analytics.forEach((log) => {
-        const date = AppDate(new Date(log.created_at));
-        if (dailyMap.has(date)) {
-          dailyMap.set(date, dailyMap.get(date) + 1);
+          const dailyMap = new Map<string, number>();
+          for (let i = 29; i >= 0; i -= 1) {
+            const date = subDays(new Date(), i);
+            dailyMap.set(format(date, "yyyy-MM-dd"), 0);
+          }
+
+          (dailyTotals as DailyTotalRow[] | null)?.forEach((row) => {
+            dailyMap.set(row.summary_date, row.views);
+          });
+
+          const dailyViews = Array.from(dailyMap.entries()).map(([rawDate, views]) => ({
+            date: formatChartDate(new Date(`${rawDate}T00:00:00`)),
+            views,
+          }));
+
+          const totalViews = ((dailyTotals as DailyTotalRow[] | null) || []).reduce(
+            (sum, row) => sum + row.views,
+            0
+          );
+
+          const uniqueVisitors = ((dailyTotals as DailyTotalRow[] | null) || []).reduce(
+            (sum, row) => sum + row.unique_visitors,
+            0
+          );
+
+          const pathMap = new Map<string, number>();
+          ((pathRows as PathSummaryRow[] | null) || []).forEach((row) => {
+            pathMap.set(row.path, (pathMap.get(row.path) || 0) + row.views);
+          });
+
+          const topPages = Array.from(pathMap.entries())
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 5);
+
+          const deviceMap = new Map<string, number>();
+          ((deviceRows as DeviceSummaryRow[] | null) || []).forEach((row) => {
+            const name = row.device_type || "Desktop";
+            deviceMap.set(name, (deviceMap.get(name) || 0) + row.views);
+          });
+
+          const devices = Array.from(deviceMap.entries()).map(([name, value]) => ({
+            name,
+            value,
+          }));
+
+          setData({
+            dailyViews,
+            topPages,
+            devices,
+            totalViews,
+            uniqueVisitors,
+            loading: false,
+          });
+        } catch (error) {
+          console.error("Error fetching analytics summaries", error);
+          setData((prev) => ({ ...prev, loading: false }));
         }
-      });
+      })();
+    }, 0);
 
-      const dailyViews = Array.from(dailyMap.entries()).map(([date, views]) => ({
-        date,
-        views,
-      }));
-
-      // Process Top Pages
-      const pageMap = new Map();
-      analytics.forEach((log) => {
-        const path = log.path.split("?")[0]; // Remove query params
-        pageMap.set(path, (pageMap.get(path) || 0) + 1);
-      });
-      const topPages = Array.from(pageMap.entries())
-        .map(([name, value]) => ({ name, value }))
-        .sort((a, b) => b.value - a.value)
-        .slice(0, 5);
-
-      // Process Devices
-      const deviceMap = new Map();
-      analytics.forEach((log) => {
-        let device = "Desktop";
-        if (/mobile/i.test(log.user_agent)) device = "Mobile";
-        else if (/tablet/i.test(log.user_agent)) device = "Tablet";
-        
-        // Simple heuristic - can be improved
-        if (log.device_type) device = log.device_type;
-        
-        deviceMap.set(device, (deviceMap.get(device) || 0) + 1);
-      });
-      const devices = Array.from(deviceMap.entries()).map(([name, value]) => ({
-        name,
-        value,
-      }));
-
-      // Unique Visitors
-      const uniqueSessions = new Set(analytics.map((log) => log.session_id)).size;
-
-      setData({
-        dailyViews,
-        topPages,
-        devices,
-        totalViews: analytics.length,
-        uniqueVisitors: uniqueSessions,
-        loading: false,
-      });
-    }
-
-    fetchData();
+    return () => window.clearTimeout(timeoutId);
   }, []);
-
-  function AppDate(date: Date) {
-      return format(date, "MMM dd");
-  }
 
   if (data.loading) {
     return (
@@ -132,9 +178,8 @@ export function AnalyticsCharts() {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="shadow-sm border-border/60">
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Views (30 Days)
@@ -144,7 +189,7 @@ export function AnalyticsCharts() {
             <div className="text-2xl font-bold">{data.totalViews.toLocaleString()}</div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm border-border/60">
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Unique Visitors
@@ -154,7 +199,7 @@ export function AnalyticsCharts() {
             <div className="text-2xl font-bold">{data.uniqueVisitors.toLocaleString()}</div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm border-border/60">
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Avg. Views/Visitor
@@ -170,9 +215,8 @@ export function AnalyticsCharts() {
         </Card>
       </div>
 
-      {/* Charts */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 shadow-sm border-border/60">
+        <Card className="col-span-4 border-border/60 shadow-sm">
           <CardHeader>
             <CardTitle>Visitor Trends</CardTitle>
             <CardDescription>Daily page views for the last 30 days</CardDescription>
@@ -182,23 +226,23 @@ export function AnalyticsCharts() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.dailyViews}>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="#888888" 
-                    fontSize={12} 
-                    tickLine={false} 
-                    axisLine={false} 
+                  <XAxis
+                    dataKey="date"
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
                   />
-                  <YAxis 
-                    stroke="#888888" 
-                    fontSize={12} 
-                    tickLine={false} 
-                    axisLine={false} 
-                    tickFormatter={(value) => `${value}`} 
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value}`}
                   />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
-                    itemStyle={{ color: 'var(--foreground)' }}
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}
+                    itemStyle={{ color: "var(--foreground)" }}
                   />
                   <Line
                     type="monotone"
@@ -214,7 +258,7 @@ export function AnalyticsCharts() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-3 shadow-sm border-border/60">
+        <Card className="col-span-3 border-border/60 shadow-sm">
           <CardHeader>
             <CardTitle>Device Distribution</CardTitle>
             <CardDescription>Visitors by device type</CardDescription>
@@ -234,29 +278,32 @@ export function AnalyticsCharts() {
                     dataKey="value"
                   >
                     {data.devices.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${entry.name}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                     contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
-                     itemStyle={{ color: 'var(--foreground)' }}
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}
+                    itemStyle={{ color: "var(--foreground)" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex justify-center gap-4 mt-4">
+              <div className="mt-4 flex justify-center gap-4">
                 {data.devices.map((entry, index) => (
-                    <div key={entry.name} className="flex items-center gap-2 text-sm">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                        <span>{entry.name}</span>
-                    </div>
+                  <div key={entry.name} className="flex items-center gap-2 text-sm">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <span>{entry.name}</span>
+                  </div>
                 ))}
-            </div>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="shadow-sm border-border/60">
+      <Card className="border-border/60 shadow-sm">
         <CardHeader>
           <CardTitle>Top Pages</CardTitle>
           <CardDescription>Most visited pages</CardDescription>
@@ -267,17 +314,17 @@ export function AnalyticsCharts() {
               <BarChart data={data.topPages} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.3} />
                 <XAxis type="number" hide />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  width={150} 
-                  tick={{ fontSize: 12 }} 
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={150}
+                  tick={{ fontSize: 12 }}
                   interval={0}
                 />
-                <Tooltip 
-                    cursor={{fill: 'transparent'}}
-                    contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
-                    itemStyle={{ color: 'var(--foreground)' }}
+                <Tooltip
+                  cursor={{ fill: "transparent" }}
+                  contentStyle={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}
+                  itemStyle={{ color: "var(--foreground)" }}
                 />
                 <Bar dataKey="value" fill="#82ca9d" radius={[0, 4, 4, 0]} barSize={30} />
               </BarChart>
