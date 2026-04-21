@@ -9,7 +9,6 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { GradientFrame } from "@/components/ui/gradient-frame";
 import { Card3D } from "@/components/ui/card-3d";
 
-// SVG Icons as components
 function GithubIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -102,16 +101,48 @@ interface SocialItemCandidate extends Omit<SocialItem, "href"> {
 
 export default async function Home() {
   const supabase = await createClient();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .single();
+  const [
+    { data: profile },
+    { data: featuredProject },
+    { data: latestArticle },
+    { count: totalProjects },
+    { count: totalArticles },
+  ] = await Promise.all([
+    supabase.from("profiles").select("*").single(),
+    supabase
+      .from("projects")
+      .select("id, slug, title, description, tech_stack, live_url")
+      .eq("visibility", "public")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("articles")
+      .select("id, slug, title, excerpt, tags, created_at")
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("projects")
+      .select("*", { count: "exact", head: true })
+      .eq("visibility", "public"),
+    supabase
+      .from("articles")
+      .select("*", { count: "exact", head: true })
+      .eq("published", true),
+  ]);
 
   const name = profile?.name || "Your Name";
   const tagline = profile?.tagline || "Software Developer";
   const bio = profile?.bio || "Hello! I build things on the internet.";
   const avatarUrl = profile?.avatar_url || "";
   const socialLinks: SocialLinks = (profile?.social_links as SocialLinks) || {};
+  const emailHref = socialLinks.email ? `mailto:${socialLinks.email}` : "";
+  const featuredProjectHref = featuredProject ? `/portfolio/${featuredProject.slug || featuredProject.id}` : "/portfolio";
+  const latestArticleHref = latestArticle ? `/blog/${latestArticle.slug}` : "/blog";
+
   const socialItemCandidates: SocialItemCandidate[] = [
     {
       href: socialLinks.github,
@@ -138,12 +169,13 @@ export default async function Home() {
       external: true,
     },
     {
-      href: socialLinks.email ? `mailto:${socialLinks.email}` : undefined,
+      href: emailHref || undefined,
       label: "Email",
       icon: <MailIcon />,
       external: false,
     },
   ];
+
   const socialItems: SocialItem[] = socialItemCandidates.filter(
     (item): item is SocialItem => Boolean(item.href)
   );
@@ -164,10 +196,6 @@ export default async function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.14),_transparent_32%),linear-gradient(to_bottom,_transparent,_rgba(0,0,0,0.04))]" />
       </div>
 
-      <div className="absolute right-4 top-4 z-20">
-        <ThemeToggle />
-      </div>
-
       <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
         <Card3D className="w-full max-w-lg">
           <GradientFrame className="w-full max-w-lg">
@@ -176,26 +204,27 @@ export default async function Home() {
               <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_32%,transparent_65%,rgba(255,255,255,0.1))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_32%,transparent_65%,rgba(255,255,255,0.04))]" />
               <Spotlight className="-left-8 top-8 h-40 w-40" fill="rgba(255,255,255,0.16)" />
 
-              <CardContent className="relative flex flex-col gap-5 px-5 py-6 sm:px-7 sm:py-7">
+              <CardContent className="relative flex flex-col gap-4 px-5 py-5 sm:px-6 sm:py-6">
                 <div className="flex items-start justify-between gap-4 [transform:translateZ(30px)]">
-                <div className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground backdrop-blur">
-                  Portfolio & Notes
+                  <div className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground backdrop-blur">
+                    Portfolio & Notes
+                  </div>
+                  <ThemeToggle className="shrink-0" />
                 </div>
-              </div>
 
-                <div className="flex flex-col items-center gap-4 text-center">
+                <div className="flex flex-col items-center gap-3 text-center">
                   <div className="relative [transform:translateZ(60px)]">
                     <div className="absolute inset-0 rounded-full bg-primary/15 blur-xl" />
-                    <Avatar className="relative h-24 w-24 border border-border/60 ring-4 ring-background/80 shadow-lg">
+                    <Avatar className="relative h-20 w-20 border border-border/60 ring-4 ring-background/80 shadow-lg">
                       <AvatarImage src={avatarUrl} alt={name} />
-                      <AvatarFallback className="bg-muted text-2xl font-semibold">
+                      <AvatarFallback className="bg-muted text-xl font-semibold">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
                   </div>
 
                   <div className="space-y-1.5 [transform:translateZ(50px)]">
-                    <h1 className="animate-fade-up-soft animate-glow-in-soft text-[1.7rem] font-semibold tracking-tight sm:text-[1.85rem]">
+                    <h1 className="animate-fade-up-soft animate-glow-in-soft text-[1.55rem] font-semibold tracking-tight sm:text-[1.7rem]">
                       {name}
                     </h1>
                     <p className="animate-fade-up-soft animate-glow-in-soft delay-100 text-sm font-medium text-muted-foreground/90">
@@ -203,25 +232,29 @@ export default async function Home() {
                     </p>
                   </div>
 
-                  <p className="animate-fade-up-soft animate-glow-in-soft delay-180 max-w-sm text-sm leading-6 text-muted-foreground [transform:translateZ(40px)]">
+                  <p className="animate-fade-up-soft animate-glow-in-soft delay-180 line-clamp-3 max-w-sm text-sm leading-6 text-muted-foreground [transform:translateZ(40px)]">
                     {bio}
                   </p>
+
                 </div>
 
                 <Separator className="w-full opacity-60" />
 
-                <div className="grid gap-2.5 [transform:translateZ(35px)]">
+                <div className="grid gap-2 [transform:translateZ(35px)]">
                   <Button
                     variant="outline"
-                    className="group animate-fade-up-soft animate-glow-in-soft delay-100 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-3 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3.5"
+                    className="group animate-fade-up-soft animate-glow-in-soft delay-100 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-2.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3"
                     asChild
                   >
                     <Link href="/portfolio" className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-foreground sm:h-11 sm:w-11">
+                      <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-foreground sm:h-10 sm:w-10">
                         <FolderIcon />
+                        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border border-border/70 bg-background px-1 text-[10px] font-semibold leading-none text-foreground shadow-sm">
+                          {totalProjects ?? 0}
+                        </span>
                       </span>
                       <span className="flex min-w-0 flex-1 flex-col items-start">
-                        <span className="text-sm font-semibold">Portfolio</span>
+                        <span className="min-w-0 text-sm font-semibold">Portfolio</span>
                         <span className="text-xs font-normal leading-5 text-muted-foreground">
                           Selected work, case studies, and experiments
                         </span>
@@ -234,15 +267,18 @@ export default async function Home() {
 
                   <Button
                     variant="outline"
-                    className="group animate-fade-up-soft animate-glow-in-soft delay-180 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-3 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3.5"
+                    className="group animate-fade-up-soft animate-glow-in-soft delay-180 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-2.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3"
                     asChild
                   >
                     <Link href="/blog" className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-foreground sm:h-11 sm:w-11">
+                      <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-foreground sm:h-10 sm:w-10">
                         <PenIcon />
+                        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border border-border/70 bg-background px-1 text-[10px] font-semibold leading-none text-foreground shadow-sm">
+                          {totalArticles ?? 0}
+                        </span>
                       </span>
                       <span className="flex min-w-0 flex-1 flex-col items-start">
-                        <span className="text-sm font-semibold">Blog</span>
+                        <span className="min-w-0 text-sm font-semibold">Blog</span>
                         <span className="text-xs font-normal leading-5 text-muted-foreground">
                           Notes, writing, and things worth sharing
                         </span>
@@ -254,21 +290,79 @@ export default async function Home() {
                   </Button>
                 </div>
 
+                <div className="space-y-2 [transform:translateZ(25px)]">
+                  <div className="px-1">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                      Highlights
+                    </p>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <Link href={featuredProjectHref} className="group animate-fade-up-soft animate-glow-in-soft delay-180 block h-full">
+                      <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/60 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/90 hover:shadow-lg">
+                        <div className="mb-1 flex items-center justify-between gap-3">
+                          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                            Featured Work
+                          </p>
+                          <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                            <ArrowUpRightIcon />
+                          </span>
+                        </div>
+                        <h2 className="mb-1 min-h-[2.5rem] text-sm font-semibold leading-5">
+                          {featuredProject?.title || "Explore the latest project"}
+                        </h2>
+                        <p className="line-clamp-2 min-h-[2.5rem] text-xs leading-5 text-muted-foreground">
+                          {featuredProject?.description || "A closer look at recent work, process, and outcome."}
+                        </p>
+                      </div>
+                    </Link>
+
+                    <Link href={latestArticleHref} className="group animate-fade-up-soft animate-glow-in-soft delay-260 block h-full">
+                      <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/60 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/90 hover:shadow-lg">
+                        <div className="mb-1 flex items-center justify-between gap-3">
+                          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                            Latest Note
+                          </p>
+                          <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                            <ArrowUpRightIcon />
+                          </span>
+                        </div>
+                        <h2 className="mb-1 min-h-[2.5rem] text-sm font-semibold leading-5">
+                          {latestArticle?.title || "Read the latest writing"}
+                        </h2>
+                        <p className="line-clamp-2 min-h-[2.5rem] text-xs leading-5 text-muted-foreground">
+                          {latestArticle?.excerpt || "Thoughts, notes, and things worth sharing from recent work."}
+                        </p>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+
                 {socialItems.length > 0 && (
                   <>
                     <Separator className="w-full opacity-60" />
 
-                    <div className="animate-fade-up-soft animate-glow-in-soft delay-260 flex items-center justify-between gap-2 rounded-2xl border border-border/60 bg-background/55 px-2.5 py-2.5 backdrop-blur-sm sm:gap-3 sm:px-3 [transform:translateZ(30px)]">
-                      <p className="shrink-0 pl-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                        Connect
-                      </p>
-                      <div className="flex min-w-0 flex-nowrap justify-end gap-1.5 sm:gap-2">
+                    <div className="animate-fade-up-soft animate-glow-in-soft delay-260 rounded-2xl border border-border/60 bg-background/55 p-3 backdrop-blur-sm [transform:translateZ(30px)]">
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="mb-0.5 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                            Connect
+                          </p>
+                          <p className="truncate text-sm font-semibold">Open to collaborations.</p>
+                        </div>
+                        {emailHref && (
+                          <Button size="sm" className="h-8 shrink-0 rounded-full px-3 text-xs" asChild>
+                            <a href={emailHref}>Email Me</a>
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="flex min-w-0 flex-wrap gap-1.5">
                         {socialItems.map((item) => (
                           <Button
                             key={item.label}
                             variant="ghost"
                             size="icon"
-                            className="h-9 w-9 shrink-0 rounded-full border border-transparent bg-background/70 transition-all hover:border-border hover:bg-background sm:h-10 sm:w-10"
+                            className="h-8 w-8 rounded-full border border-transparent bg-background/70 transition-all hover:border-border hover:bg-background"
                             asChild
                           >
                             <a

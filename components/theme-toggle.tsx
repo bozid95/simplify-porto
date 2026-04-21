@@ -3,6 +3,7 @@
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function SunIcon() {
   return (
@@ -24,21 +25,37 @@ function MoonIcon() {
   );
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setMounted(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   if (!mounted) {
-    return <Button variant="ghost" size="icon" className="h-8 w-8" disabled />;
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className={cn("h-9 w-9 rounded-full border border-border/60 bg-background/70", className)}
+        disabled
+      />
+    );
   }
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      className="h-8 w-8"
+      className={cn(
+        "h-9 w-9 rounded-full border border-border/60 bg-background/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm transition-colors hover:bg-background/90",
+        className
+      )}
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >

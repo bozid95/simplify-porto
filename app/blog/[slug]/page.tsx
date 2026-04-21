@@ -1,19 +1,9 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 import { ArticleContent } from "./article-content";
-import { ThemeToggle } from "@/components/theme-toggle";
-
-function ArrowLeftIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12 19-7-7 7-7" /><path d="M19 12H5" />
-    </svg>
-  );
-}
+import { PageNav } from "@/components/page-nav";
 
 export default async function ArticlePage({
   params,
@@ -38,22 +28,8 @@ export default async function ArticlePage({
         <div className="absolute left-0 top-1/3 h-96 w-96 -translate-x-1/4 rounded-full bg-muted-foreground/10 blur-3xl" />
       </div>
 
-      <div className="absolute right-4 top-4 z-20">
-        <ThemeToggle />
-      </div>
-
       <article className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-9">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-6 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
-          asChild
-        >
-          <Link href="/blog">
-            <ArrowLeftIcon />
-            Back to Blog
-          </Link>
-        </Button>
+        <PageNav backHref="/blog" backLabel="Back to Blog" />
 
         <Card className="rounded-[2rem] border-border/50 bg-card/75 py-0 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl">
           <CardContent className="px-5 py-6 sm:px-7 sm:py-8">

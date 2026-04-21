@@ -2,19 +2,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Spotlight } from "@/components/ui/spotlight";
 import { GradientFrame } from "@/components/ui/gradient-frame";
-import { ThemeToggle } from "@/components/theme-toggle";
-
-function ArrowLeftIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12 19-7-7 7-7" />
-      <path d="M19 12H5" />
-    </svg>
-  );
-}
+import { PageNav } from "@/components/page-nav";
 
 export default async function BlogPage() {
   const supabase = await createClient();
@@ -32,22 +22,8 @@ export default async function BlogPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_35%)]" />
       </div>
 
-      <div className="absolute right-4 top-4 z-20">
-        <ThemeToggle />
-      </div>
-
       <div className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-6 gap-2 rounded-full border border-border/60 bg-background/70 px-4 backdrop-blur-sm"
-          asChild
-        >
-          <Link href="/">
-            <ArrowLeftIcon />
-            Back
-          </Link>
-        </Button>
+        <PageNav backHref="/" backLabel="Back" />
 
         <div className="mb-8 max-w-2xl">
           <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">

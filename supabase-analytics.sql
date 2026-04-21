@@ -1,4 +1,4 @@
--- ============================================
+/* -- ============================================
 -- Analytics Schema + Rollups
 -- Run this in your Supabase SQL Editor
 -- ============================================
@@ -267,3 +267,4 @@ create index if not exists analytics_daily_device_summary_date_idx on analytics_
 
 -- Build rollups for existing analytics data
 select public.rebuild_analytics_rollups();
+ */
