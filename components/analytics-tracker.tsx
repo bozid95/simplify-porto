@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 function detectDeviceType(userAgent: string) {
@@ -10,9 +10,16 @@ function detectDeviceType(userAgent: string) {
   return "Desktop";
 }
 
+function normalizeAnalyticsPath(pathname: string) {
+  if (pathname === "/blog") return "/notes";
+  if (pathname.startsWith("/blog/")) {
+    return pathname.replace(/^\/blog/, "/notes");
+  }
+  return pathname || "/";
+}
+
 export function AnalyticsTracker() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!pathname || pathname.startsWith("/dashboard") || pathname.startsWith("/login")) {
@@ -29,18 +36,22 @@ export function AnalyticsTracker() {
     const trackView = async () => {
       const supabase = createClient();
       const userAgent = window.navigator.userAgent;
-      const fullPath = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
+      const canonicalPath = normalizeAnalyticsPath(pathname);
       const deviceType = detectDeviceType(userAgent);
 
-      await supabase.from("analytics").insert({
-        path: fullPath,
+      const { error } = await supabase.from("analytics").insert({
+        path: canonicalPath,
         device_type: deviceType,
         session_id: sessionId,
       });
+
+      if (error) {
+        console.error("Failed to track analytics view", error);
+      }
     };
 
     trackView();
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   return null;
 }

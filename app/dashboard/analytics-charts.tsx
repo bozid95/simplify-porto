@@ -21,22 +21,11 @@ import { format, startOfDay, subDays } from "date-fns";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
-type DailyTotalRow = {
-  summary_date: string;
-  views: number;
-  unique_visitors: number;
-};
-
-type PathSummaryRow = {
-  summary_date: string;
+type RawAnalyticsRow = {
   path: string;
-  views: number;
-};
-
-type DeviceSummaryRow = {
-  summary_date: string;
-  device_type: string;
-  views: number;
+  device_type: string | null;
+  session_id: string | null;
+  created_at: string;
 };
 
 type ChartPoint = {
@@ -62,6 +51,15 @@ function formatChartDate(date: Date) {
   return format(date, "MMM dd");
 }
 
+function normalizePublicPath(path: string) {
+  const withoutQuery = path.split("?")[0] || "/";
+  if (withoutQuery === "/blog") return "/notes";
+  if (withoutQuery.startsWith("/blog/")) {
+    return withoutQuery.replace(/^\/blog/, "/notes");
+  }
+  return withoutQuery;
+}
+
 export function AnalyticsCharts() {
   const [data, setData] = useState<AnalyticsState>({
     dailyViews: [],
@@ -78,40 +76,43 @@ export function AnalyticsCharts() {
         try {
           const supabase = createClient();
           const startDate = subDays(startOfDay(new Date()), 29);
-          const startDateSql = format(startDate, "yyyy-MM-dd");
 
-          const [
-            { data: dailyTotals, error: dailyTotalsError },
-            { data: pathRows, error: pathRowsError },
-            { data: deviceRows, error: deviceRowsError },
-          ] = await Promise.all([
-            supabase
-              .from("analytics_daily_totals")
-              .select("summary_date, views, unique_visitors")
-              .gte("summary_date", startDateSql)
-              .order("summary_date", { ascending: true }),
-            supabase
-              .from("analytics_daily_path_summary")
-              .select("summary_date, path, views")
-              .gte("summary_date", startDateSql),
-            supabase
-              .from("analytics_daily_device_summary")
-              .select("summary_date, device_type, views")
-              .gte("summary_date", startDateSql),
-          ]);
+          const { data: rawAnalytics, error: rawAnalyticsError } = await supabase
+            .from("analytics")
+            .select("path, device_type, session_id, created_at")
+            .gte("created_at", startDate.toISOString())
+            .order("created_at", { ascending: true });
 
-          if (dailyTotalsError || pathRowsError || deviceRowsError) {
-            throw dailyTotalsError || pathRowsError || deviceRowsError;
+          if (rawAnalyticsError) {
+            throw rawAnalyticsError;
           }
+
+          const rows = (rawAnalytics as RawAnalyticsRow[] | null) || [];
 
           const dailyMap = new Map<string, number>();
+          const dailyVisitors = new Map<string, Set<string>>();
           for (let i = 29; i >= 0; i -= 1) {
             const date = subDays(new Date(), i);
-            dailyMap.set(format(date, "yyyy-MM-dd"), 0);
+            const key = format(date, "yyyy-MM-dd");
+            dailyMap.set(key, 0);
+            dailyVisitors.set(key, new Set());
           }
 
-          (dailyTotals as DailyTotalRow[] | null)?.forEach((row) => {
-            dailyMap.set(row.summary_date, row.views);
+          const pathMap = new Map<string, number>();
+          const deviceMap = new Map<string, number>();
+          const totalVisitors = new Set<string>();
+
+          rows.forEach((row, index) => {
+            const dateKey = format(new Date(row.created_at), "yyyy-MM-dd");
+            const visitorId = row.session_id || `anonymous-${index}`;
+            const path = normalizePublicPath(row.path || "/");
+            const device = row.device_type || "Desktop";
+
+            dailyMap.set(dateKey, (dailyMap.get(dateKey) || 0) + 1);
+            dailyVisitors.get(dateKey)?.add(visitorId);
+            totalVisitors.add(visitorId);
+            pathMap.set(path, (pathMap.get(path) || 0) + 1);
+            deviceMap.set(device, (deviceMap.get(device) || 0) + 1);
           });
 
           const dailyViews = Array.from(dailyMap.entries()).map(([rawDate, views]) => ({
@@ -119,31 +120,13 @@ export function AnalyticsCharts() {
             views,
           }));
 
-          const totalViews = ((dailyTotals as DailyTotalRow[] | null) || []).reduce(
-            (sum, row) => sum + row.views,
-            0
-          );
-
-          const uniqueVisitors = ((dailyTotals as DailyTotalRow[] | null) || []).reduce(
-            (sum, row) => sum + row.unique_visitors,
-            0
-          );
-
-          const pathMap = new Map<string, number>();
-          ((pathRows as PathSummaryRow[] | null) || []).forEach((row) => {
-            pathMap.set(row.path, (pathMap.get(row.path) || 0) + row.views);
-          });
+          const totalViews = rows.length;
+          const uniqueVisitors = totalVisitors.size;
 
           const topPages = Array.from(pathMap.entries())
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value)
             .slice(0, 5);
-
-          const deviceMap = new Map<string, number>();
-          ((deviceRows as DeviceSummaryRow[] | null) || []).forEach((row) => {
-            const name = row.device_type || "Desktop";
-            deviceMap.set(name, (deviceMap.get(name) || 0) + row.views);
-          });
 
           const devices = Array.from(deviceMap.entries()).map(([name, value]) => ({
             name,

@@ -33,6 +33,15 @@ interface Article {
   views?: number;
 }
 
+function normalizePublicPath(path: string) {
+  const withoutQuery = path.split("?")[0] || "/";
+  if (withoutQuery === "/blog") return "/notes";
+  if (withoutQuery.startsWith("/blog/")) {
+    return withoutQuery.replace(/^\/blog/, "/notes");
+  }
+  return withoutQuery;
+}
+
 function PlusIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -86,15 +95,17 @@ export default function ArticlesPage() {
       return;
     }
 
-    // Fetch view counts
-    const { data: analyticsSummaryData } = await supabase
-      .from("analytics_daily_path_summary")
-      .select("path, views");
+    // Fetch raw view paths so the dashboard updates without waiting for rollups.
+    const { data: analyticsData } = await supabase
+      .from("analytics")
+      .select("path");
       
-    // Count views for each article
+    // Count views for each article. Keep legacy /blog paths compatible with /notes.
     const articlesWithViews = articlesData.map(article => {
-      const views = analyticsSummaryData?.reduce((total, row) => {
-        return row.path === `/blog/${article.slug}` ? total + row.views : total;
+      const views = analyticsData?.reduce((total, row) => {
+        return normalizePublicPath(row.path || "") === `/notes/${article.slug}`
+          ? total + 1
+          : total;
       }, 0) || 0;
       return { ...article, views };
     });
