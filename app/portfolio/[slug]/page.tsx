@@ -69,16 +69,16 @@ export default async function ProjectDetailPage({
   const liveUrl = normalizeExternalUrl(project.live_url);
   const repoUrl = normalizeExternalUrl(project.repo_url);
 
-  if (mode === "nostalgia") {
+  if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
         <p data-nostalgia-modern>
-          <Link href={`/portfolio/${project.slug || project.id}`}>Modern mode</Link>
+          <Link href={`/portfolio/${project.slug || project.id}?mode=modern`}>Modern mode</Link>
         </p>
         <h1>{project.title}</h1>
         <p>
-          <Link href="/?mode=nostalgia">Home</Link> |{" "}
-          <Link href="/portfolio?mode=nostalgia">{"<- Back to Portfolio"}</Link>
+          <Link href="/">Home</Link> |{" "}
+          <Link href="/portfolio">{"<- Back to Portfolio"}</Link>
         </p>
         <hr />
 
@@ -129,9 +129,9 @@ export default async function ProjectDetailPage({
 
       <article className="relative mx-auto max-w-5xl px-4 py-7 sm:px-6 sm:py-9">
         <PageNav
-          backHref="/portfolio"
+          backHref="/portfolio?mode=modern"
           backLabel="Back to Portfolio"
-          modeHref={`/portfolio/${project.slug || project.id}?mode=nostalgia`}
+          modeHref={`/portfolio/${project.slug || project.id}`}
           modeLabel="Nostalgia Mode"
         />
 

@@ -6,6 +6,13 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { GradientFrame } from "@/components/ui/gradient-frame";
 import { PageNav } from "@/components/page-nav";
 
+function truncateText(text?: string | null, maxLength = 140) {
+  const value = text?.trim();
+  if (!value) return "";
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength).trimEnd()}...`;
+}
+
 export default async function BlogPage({
   searchParams,
 }: {
@@ -19,16 +26,16 @@ export default async function BlogPage({
     .eq("published", true)
     .order("created_at", { ascending: false });
 
-  if (mode === "nostalgia") {
+  if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
         <p data-nostalgia-modern>
-          <Link href="/blog">Modern mode</Link>
+          <Link href="/blog?mode=modern">Modern mode</Link>
         </p>
-        <h1>Blog</h1>
+        <h1>Notes</h1>
         <p>
-          <Link href="/?mode=nostalgia">Home</Link> |{" "}
-          <Link href="/portfolio?mode=nostalgia">Portfolio</Link>
+          <Link href="/">Home</Link> |{" "}
+          <Link href="/portfolio">Portfolio</Link>
         </p>
         <hr />
 
@@ -36,10 +43,12 @@ export default async function BlogPage({
           <ul>
             {articles.map((article) => (
               <li key={article.id}>
-                <Link href={`/blog/${article.slug}?mode=nostalgia`}>
+                <Link href={`/blog/${article.slug}`}>
                   {article.title}
                 </Link>
-                {article.excerpt ? `: ${article.excerpt}` : ""}
+                {truncateText(article.excerpt) ? `: ${truncateText(article.excerpt)}` : ""}
+                {" "}
+                <Link href={`/blog/${article.slug}`}>Read more...</Link>
                 <ul>
                   <li>
                     {new Date(article.created_at).toLocaleDateString("id-ID", {
@@ -56,7 +65,7 @@ export default async function BlogPage({
             ))}
           </ul>
         ) : (
-          <p>No articles yet.</p>
+          <p>No notes yet.</p>
         )}
       </main>
     );
@@ -72,18 +81,18 @@ export default async function BlogPage({
 
       <div className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-8">
         <PageNav
-          backHref="/"
+          backHref="/?mode=modern"
           backLabel="Back"
-          modeHref="/blog?mode=nostalgia"
+          modeHref="/blog"
           modeLabel="Nostalgia Mode"
         />
 
         <div className="mb-8 max-w-2xl">
           <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-            Writing & Notes
+            Notes
           </p>
           <h1 className="mb-2 text-[1.9rem] font-semibold tracking-tight sm:text-[2.15rem]">
-            Blog
+            Notes
           </h1>
         </div>
 
@@ -97,7 +106,7 @@ export default async function BlogPage({
                 " delay-260";
 
               return (
-              <Link key={article.id} href={`/blog/${article.slug}`} className={`group animate-fade-up-soft${delayClass}`}>
+              <Link key={article.id} href={`/blog/${article.slug}?mode=modern`} className={`group animate-fade-up-soft${delayClass}`}>
                 <GradientFrame className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_70px_rgba(0,0,0,0.12)]">
                   <Card className="cursor-pointer rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
                     <CardHeader className="pb-2 pt-5">
@@ -141,7 +150,7 @@ export default async function BlogPage({
           <GradientFrame>
             <Card className="rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 backdrop-blur-xl shadow-none">
               <CardContent className="px-6 py-8 text-sm text-muted-foreground">
-                No articles yet.
+                No notes yet.
               </CardContent>
             </Card>
           </GradientFrame>

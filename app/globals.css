@@ -211,7 +211,7 @@
     position: relative;
     max-width: 760px;
     margin: 32px auto;
-    padding: 0 16px;
+    padding: 2.25em 16px 0;
     background: Canvas;
     color: CanvasText;
     font-family: Georgia, "Times New Roman", Times, serif;
@@ -234,6 +234,10 @@
     right: 16px;
     margin: 0;
     font-size: 0.95em;
+  }
+
+  [data-mode="nostalgia"] [data-nostalgia-modern] + h1 {
+    margin-top: 0;
   }
 
   [data-mode="nostalgia"] h1,

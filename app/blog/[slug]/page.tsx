@@ -27,16 +27,16 @@ export default async function ArticlePage({
 
   if (!article) notFound();
 
-  if (mode === "nostalgia") {
+  if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
         <p data-nostalgia-modern>
-          <Link href={`/blog/${article.slug}`}>Modern mode</Link>
+          <Link href={`/blog/${article.slug}?mode=modern`}>Modern mode</Link>
         </p>
         <h1>{article.title}</h1>
         <p>
-          <Link href="/?mode=nostalgia">Home</Link> |{" "}
-          <Link href="/blog?mode=nostalgia">{"<- Back to Blog"}</Link>
+          <Link href="/">Home</Link> |{" "}
+          <Link href="/blog">{"<- Back to Notes"}</Link>
         </p>
         <p>
           {new Date(article.created_at).toLocaleDateString("en-US", {
@@ -53,7 +53,7 @@ export default async function ArticlePage({
             {article.content}
           </ReactMarkdown>
         ) : (
-          <p>No article content yet.</p>
+          <p>No note content yet.</p>
         )}
       </main>
     );
@@ -68,9 +68,9 @@ export default async function ArticlePage({
 
       <article className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-9">
         <PageNav
-          backHref="/blog"
-          backLabel="Back to Blog"
-          modeHref={`/blog/${article.slug}?mode=nostalgia`}
+          backHref="/blog?mode=modern"
+          backLabel="Back to Notes"
+          modeHref={`/blog/${article.slug}`}
           modeLabel="Nostalgia Mode"
         />
 
@@ -78,7 +78,7 @@ export default async function ArticlePage({
           <CardContent className="px-5 py-6 sm:px-7 sm:py-8">
             <header className="mb-8">
               <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                Article
+                Note
               </p>
               <time className="inline-flex rounded-full border border-border/50 bg-background/70 px-3 py-1 text-[11px] font-medium text-muted-foreground">
                 {new Date(article.created_at).toLocaleDateString("en-US", {

@@ -156,6 +156,13 @@ function resolveStackLogo(label: string): StackLogoItem | null {
   return stackLogoMap[normalizeTechKey(label)] ?? null;
 }
 
+function truncateText(text?: string | null, maxLength = 120) {
+  const value = text?.trim();
+  if (!value) return "";
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength).trimEnd()}...`;
+}
+
 export default async function Home({
   searchParams,
 }: {
@@ -265,11 +272,11 @@ export default async function Home({
     (item): item is SocialItem => Boolean(item.href)
   );
 
-  if (mode === "nostalgia") {
+  if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
         <p data-nostalgia-modern>
-          <Link href="/">Modern Mode</Link>
+          <Link href="/?mode=modern">Modern Mode</Link>
         </p>
         <h1>{name}</h1>
         <p>{tagline}</p>
@@ -294,16 +301,18 @@ export default async function Home({
         <hr />
 
         <h2>
-          Recent Writing (<Link href="/blog?mode=nostalgia">All</Link>)
+          Recent Notes (<Link href="/blog">All</Link>)
         </h2>
         {nostalgiaArticles && nostalgiaArticles.length > 0 ? (
           <ul>
             {nostalgiaArticles.map((article) => (
               <li key={article.slug}>
-                <Link href={`/blog/${article.slug}?mode=nostalgia`}>
+                <Link href={`/blog/${article.slug}`}>
                   {article.title}
                 </Link>
-                {article.excerpt ? `: ${article.excerpt}` : ""}
+                {truncateText(article.excerpt, 110) ? `: ${truncateText(article.excerpt, 110)}` : ""}
+                {" "}
+                <Link href={`/blog/${article.slug}`}>Read more...</Link>
               </li>
             ))}
           </ul>
@@ -314,16 +323,18 @@ export default async function Home({
         <hr />
 
         <h2>
-          Projects (<Link href="/portfolio?mode=nostalgia">All</Link>)
+          Projects (<Link href="/portfolio">All</Link>)
         </h2>
         {nostalgiaProjects && nostalgiaProjects.length > 0 ? (
           <ul>
             {nostalgiaProjects.map((project) => (
               <li key={project.id}>
-                <Link href={`/portfolio/${project.slug || project.id}?mode=nostalgia`}>
+                <Link href={`/portfolio/${project.slug || project.id}`}>
                   {project.title}
                 </Link>
-                {project.description ? `: ${project.description}` : ""}
+                {truncateText(project.description, 110) ? `: ${truncateText(project.description, 110)}` : ""}
+                {" "}
+                <Link href={`/portfolio/${project.slug || project.id}`}>Read more...</Link>
               </li>
             ))}
           </ul>
@@ -405,7 +416,7 @@ export default async function Home({
                       className="rounded-full border border-border/60 bg-background/70 px-3 text-xs"
                       asChild
                     >
-                      <Link href="/?mode=nostalgia">Nostalgia Mode</Link>
+                      <Link href="/">Nostalgia Mode</Link>
                     </Button>
                     <ThemeToggle className="shrink-0" />
                   </div>
@@ -483,7 +494,7 @@ export default async function Home({
                     className="group animate-fade-up-soft animate-glow-in-soft delay-100 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-2.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3"
                     asChild
                   >
-                    <Link href="/portfolio" className="flex min-w-0 items-center gap-3">
+                    <Link href="/portfolio?mode=modern" className="flex min-w-0 items-center gap-3">
                       <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-foreground sm:h-10 sm:w-10">
                         <FolderIcon />
                         <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border border-border/70 bg-background px-1 text-[10px] font-semibold leading-none text-foreground shadow-sm">
@@ -507,7 +518,7 @@ export default async function Home({
                     className="group animate-fade-up-soft animate-glow-in-soft delay-180 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-2.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3"
                     asChild
                   >
-                    <Link href="/blog" className="flex min-w-0 items-center gap-3">
+                    <Link href="/blog?mode=modern" className="flex min-w-0 items-center gap-3">
                       <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-foreground sm:h-10 sm:w-10">
                         <PenIcon />
                         <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border border-border/70 bg-background px-1 text-[10px] font-semibold leading-none text-foreground shadow-sm">
@@ -515,7 +526,7 @@ export default async function Home({
                         </span>
                       </span>
                       <span className="flex min-w-0 flex-1 flex-col items-start">
-                        <span className="min-w-0 text-sm font-semibold">Blog</span>
+                        <span className="min-w-0 text-sm font-semibold">Notes</span>
                         <span className="text-xs font-normal leading-5 text-muted-foreground">
                           Notes and writing
                         </span>
@@ -529,7 +540,7 @@ export default async function Home({
 
                 <div className="grid gap-2 sm:grid-cols-2">
                   <Link
-                    href={featuredProjectHref}
+                    href={`${featuredProjectHref}?mode=modern`}
                     className="group animate-fade-up-soft animate-glow-in-soft delay-180 block h-full"
                   >
                     <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/45 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/80 hover:shadow-[0_20px_40px_-28px_rgba(0,0,0,0.45)]">
@@ -551,7 +562,7 @@ export default async function Home({
                   </Link>
 
                   <Link
-                    href={latestArticleHref}
+                    href={`${latestArticleHref}?mode=modern`}
                     className="group animate-fade-up-soft animate-glow-in-soft delay-260 block h-full"
                   >
                     <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/45 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/80 hover:shadow-[0_20px_40px_-28px_rgba(0,0,0,0.45)]">

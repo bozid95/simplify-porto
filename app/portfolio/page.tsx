@@ -32,6 +32,13 @@ function normalizeExternalUrl(url?: string | null) {
   return `https://${url}`;
 }
 
+function truncateText(text?: string | null, maxLength = 140) {
+  const value = text?.trim();
+  if (!value) return "";
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength).trimEnd()}...`;
+}
+
 export default async function PortfolioPage({
   searchParams,
 }: {
@@ -45,16 +52,16 @@ export default async function PortfolioPage({
     .eq("visibility", "public")
     .order("sort_order", { ascending: true });
 
-  if (mode === "nostalgia") {
+  if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
         <p data-nostalgia-modern>
-          <Link href="/portfolio">Modern mode</Link>
+          <Link href="/portfolio?mode=modern">Modern mode</Link>
         </p>
         <h1>Portfolio</h1>
         <p>
-          <Link href="/?mode=nostalgia">Home</Link> |{" "}
-          <Link href="/blog?mode=nostalgia">Blog</Link>
+          <Link href="/">Home</Link> |{" "}
+          <Link href="/blog">Notes</Link>
         </p>
         <hr />
 
@@ -66,16 +73,18 @@ export default async function PortfolioPage({
 
               return (
                 <li key={project.id}>
-                  <Link href={`/portfolio/${project.slug || project.id}?mode=nostalgia`}>
+                  <Link href={`/portfolio/${project.slug || project.id}`}>
                     {project.title}
                   </Link>
-                  {project.description ? `: ${project.description}` : ""}
+                  {truncateText(project.description) ? `: ${truncateText(project.description)}` : ""}
+                  {" "}
+                  <Link href={`/portfolio/${project.slug || project.id}`}>Read more...</Link>
                   <ul>
                     {project.tech_stack && project.tech_stack.length > 0 && (
                       <li>Tech stack: {project.tech_stack.join(", ")}</li>
                     )}
                     <li>
-                      <Link href={`/portfolio/${project.slug || project.id}?mode=nostalgia`}>
+                      <Link href={`/portfolio/${project.slug || project.id}`}>
                         Project details
                       </Link>
                       {liveUrl && (
@@ -119,9 +128,9 @@ export default async function PortfolioPage({
 
       <div className="relative mx-auto max-w-5xl px-4 py-7 sm:px-6 sm:py-8">
         <PageNav
-          backHref="/"
+          backHref="/?mode=modern"
           backLabel="Back"
-          modeHref="/portfolio?mode=nostalgia"
+          modeHref="/portfolio"
           modeLabel="Nostalgia Mode"
         />
 
@@ -147,7 +156,7 @@ export default async function PortfolioPage({
 
               return (
               <div key={project.id} className={`group relative animate-fade-up-soft${delayClass}`}>
-                <Link href={`/portfolio/${project.slug || project.id}`} className="block h-full">
+                <Link href={`/portfolio/${project.slug || project.id}?mode=modern`} className="block h-full">
                   <GradientFrame className="h-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_80px_rgba(0,0,0,0.14)]">
                     <Card className="h-full overflow-hidden rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
                       {project.image_url && (
