@@ -34,19 +34,19 @@ export function AnalyticsTracker() {
     }
 
     const trackView = async () => {
-      const supabase = createClient();
-      const userAgent = window.navigator.userAgent;
-      const canonicalPath = normalizeAnalyticsPath(pathname);
-      const deviceType = detectDeviceType(userAgent);
+      try {
+        const supabase = createClient();
+        const userAgent = window.navigator.userAgent;
+        const canonicalPath = normalizeAnalyticsPath(pathname);
+        const deviceType = detectDeviceType(userAgent);
 
-      const { error } = await supabase.from("analytics").insert({
-        path: canonicalPath,
-        device_type: deviceType,
-        session_id: sessionId,
-      });
-
-      if (error) {
-        console.error("Failed to track analytics view", error);
+        await supabase.from("analytics").insert({
+          path: canonicalPath,
+          device_type: deviceType,
+          session_id: sessionId,
+        });
+      } catch {
+        // Analytics must never interrupt page usage.
       }
     };
 
