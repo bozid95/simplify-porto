@@ -30,7 +30,7 @@ export default async function BlogPage({
     return (
       <main data-mode="nostalgia">
         <p data-nostalgia-modern>
-          <Link href="/blog?mode=modern">Modern mode</Link>
+          <Link href="/notes?mode=modern">Modern mode</Link>
         </p>
         <h1>Notes</h1>
         <p>
@@ -43,12 +43,12 @@ export default async function BlogPage({
           <ul>
             {articles.map((article) => (
               <li key={article.id}>
-                <Link href={`/blog/${article.slug}`}>
+                <Link href={`/notes/${article.slug}`}>
                   {article.title}
                 </Link>
                 {truncateText(article.excerpt) ? `: ${truncateText(article.excerpt)}` : ""}
                 {" "}
-                <Link href={`/blog/${article.slug}`}>Read more...</Link>
+                <Link href={`/notes/${article.slug}`}>Read more...</Link>
                 <ul>
                   <li>
                     {new Date(article.created_at).toLocaleDateString("id-ID", {
@@ -83,7 +83,7 @@ export default async function BlogPage({
         <PageNav
           backHref="/?mode=modern"
           backLabel="Back"
-          modeHref="/blog"
+          modeHref="/notes"
           modeLabel="Nostalgia Mode"
         />
 
@@ -106,7 +106,7 @@ export default async function BlogPage({
                 " delay-260";
 
               return (
-              <Link key={article.id} href={`/blog/${article.slug}?mode=modern`} className={`group animate-fade-up-soft${delayClass}`}>
+              <Link key={article.id} href={`/notes/${article.slug}?mode=modern`} className={`group animate-fade-up-soft${delayClass}`}>
                 <GradientFrame className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_70px_rgba(0,0,0,0.12)]">
                   <Card className="cursor-pointer rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
                     <CardHeader className="pb-2 pt-5">

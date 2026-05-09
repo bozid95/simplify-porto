@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -32,6 +33,47 @@ function normalizeExternalUrl(url?: string | null) {
   if (!url) return "";
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(url)) return url;
   return `https://${url}`;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  let { data: project } = await supabase
+    .from("projects")
+    .select("id, slug, title, description, image_url")
+    .eq("slug", slug)
+    .eq("visibility", "public")
+    .single();
+
+  if (!project && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)) {
+    const { data: projectById } = await supabase
+      .from("projects")
+      .select("id, slug, title, description, image_url")
+      .eq("id", slug)
+      .eq("visibility", "public")
+      .single();
+    project = projectById;
+  }
+
+  if (!project) {
+    return {
+      title: "Portfolio — Widodo",
+    };
+  }
+
+  return {
+    title: `${project.title} — Widodo`,
+    description: project.description || "Project by Widodo",
+    openGraph: {
+      title: `${project.title} — Widodo`,
+      description: project.description || "Project by Widodo",
+      images: project.image_url ? [project.image_url] : undefined,
+    },
+  };
 }
 
 export default async function ProjectDetailPage({

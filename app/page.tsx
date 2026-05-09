@@ -29,14 +29,6 @@ function LinkedinIcon() {
   );
 }
 
-function TwitterIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-    </svg>
-  );
-}
-
 function ThreadsIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -83,7 +75,6 @@ function PenIcon() {
 interface SocialLinks {
   github?: string;
   linkedin?: string;
-  twitter?: string;
   threads?: string;
   email?: string;
   [key: string]: string | undefined;
@@ -233,7 +224,7 @@ export default async function Home({
   const socialLinks: SocialLinks = (profile?.social_links as SocialLinks) || {};
   const emailHref = socialLinks.email ? `mailto:${socialLinks.email}` : "";
   const featuredProjectHref = featuredProject ? `/portfolio/${featuredProject.slug || featuredProject.id}` : "/portfolio";
-  const latestArticleHref = latestArticle ? `/blog/${latestArticle.slug}` : "/blog";
+  const latestArticleHref = latestArticle ? `/notes/${latestArticle.slug}` : "/notes";
 
   const socialItemCandidates: SocialItemCandidate[] = [
     {
@@ -246,12 +237,6 @@ export default async function Home({
       href: socialLinks.linkedin,
       label: "LinkedIn",
       icon: <LinkedinIcon />,
-      external: true,
-    },
-    {
-      href: socialLinks.twitter,
-      label: "Twitter",
-      icon: <TwitterIcon />,
       external: true,
     },
     {
@@ -301,18 +286,18 @@ export default async function Home({
         <hr />
 
         <h2>
-          Recent Notes (<Link href="/blog">All</Link>)
+          Recent Notes (<Link href="/notes">All</Link>)
         </h2>
         {nostalgiaArticles && nostalgiaArticles.length > 0 ? (
           <ul>
             {nostalgiaArticles.map((article) => (
               <li key={article.slug}>
-                <Link href={`/blog/${article.slug}`}>
+                <Link href={`/notes/${article.slug}`}>
                   {article.title}
                 </Link>
                 {truncateText(article.excerpt, 110) ? `: ${truncateText(article.excerpt, 110)}` : ""}
                 {" "}
-                <Link href={`/blog/${article.slug}`}>Read more...</Link>
+                <Link href={`/notes/${article.slug}`}>Read more...</Link>
               </li>
             ))}
           </ul>
@@ -518,7 +503,7 @@ export default async function Home({
                     className="group animate-fade-up-soft animate-glow-in-soft delay-180 h-auto w-full justify-start rounded-2xl border-border/70 bg-background/70 px-3 py-2.5 text-left shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-background/95 hover:shadow-lg sm:px-4 sm:py-3"
                     asChild
                   >
-                    <Link href="/blog?mode=modern" className="flex min-w-0 items-center gap-3">
+                    <Link href="/notes?mode=modern" className="flex min-w-0 items-center gap-3">
                       <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-foreground sm:h-10 sm:w-10">
                         <PenIcon />
                         <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border border-border/70 bg-background px-1 text-[10px] font-semibold leading-none text-foreground shadow-sm">

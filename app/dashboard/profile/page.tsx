@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import { toast } from "sonner";
 interface SocialLinks {
   github: string;
   linkedin: string;
-  twitter: string;
   threads: string;
   email: string;
 }
@@ -32,18 +31,13 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  async function loadProfile() {
+  const loadProfile = useCallback(async () => {
     const supabase = createClient();
     const { data } = await supabase.from("profiles").select("*").single();
     if (data) {
       const defaultSocialLinks: SocialLinks = {
         github: "",
         linkedin: "",
-        twitter: "",
         threads: "",
         email: "",
       };
@@ -57,7 +51,15 @@ export default function ProfilePage() {
       });
     }
     setLoading(false);
-  }
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadProfile();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [loadProfile]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -184,15 +186,6 @@ export default function ProfilePage() {
                 value={profile.social_links.linkedin}
                 onChange={(e) => updateSocialLink("linkedin", e.target.value)}
                 placeholder="https://linkedin.com/in/username"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="twitter">Twitter / X</Label>
-              <Input
-                id="twitter"
-                value={profile.social_links.twitter}
-                onChange={(e) => updateSocialLink("twitter", e.target.value)}
-                placeholder="https://twitter.com/username"
               />
             </div>
             <div className="space-y-2">

@@ -56,7 +56,11 @@ export default function EditArticlePage() {
   }, [id]);
 
   useEffect(() => {
-    loadArticle();
+    const timeoutId = window.setTimeout(() => {
+      void loadArticle();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [loadArticle]);
 
   async function handleSave(e: React.FormEvent) {

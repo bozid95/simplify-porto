@@ -9,6 +9,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/notes",
+        destination: "/blog",
+      },
+      {
+        source: "/notes/:slug",
+        destination: "/blog/:slug",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

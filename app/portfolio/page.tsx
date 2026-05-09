@@ -61,7 +61,7 @@ export default async function PortfolioPage({
         <h1>Portfolio</h1>
         <p>
           <Link href="/">Home</Link> |{" "}
-          <Link href="/blog">Notes</Link>
+          <Link href="/notes">Notes</Link>
         </p>
         <hr />
 

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -7,6 +8,36 @@ import { Card, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 import { ArticleContent } from "./article-content";
 import { PageNav } from "@/components/page-nav";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data: article } = await supabase
+    .from("articles")
+    .select("title, excerpt")
+    .eq("slug", slug)
+    .eq("published", true)
+    .single();
+
+  if (!article) {
+    return {
+      title: "Notes — Widodo",
+    };
+  }
+
+  return {
+    title: `${article.title} — Widodo`,
+    description: article.excerpt || "Note by Widodo",
+    openGraph: {
+      title: `${article.title} — Widodo`,
+      description: article.excerpt || "Note by Widodo",
+    },
+  };
+}
 
 export default async function ArticlePage({
   params,
@@ -31,12 +62,12 @@ export default async function ArticlePage({
     return (
       <main data-mode="nostalgia">
         <p data-nostalgia-modern>
-          <Link href={`/blog/${article.slug}?mode=modern`}>Modern mode</Link>
+          <Link href={`/notes/${article.slug}?mode=modern`}>Modern mode</Link>
         </p>
         <h1>{article.title}</h1>
         <p>
           <Link href="/">Home</Link> |{" "}
-          <Link href="/blog">{"<- Back to Notes"}</Link>
+          <Link href="/notes">{"<- Back to Notes"}</Link>
         </p>
         <p>
           {new Date(article.created_at).toLocaleDateString("en-US", {
@@ -68,9 +99,9 @@ export default async function ArticlePage({
 
       <article className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-9">
         <PageNav
-          backHref="/blog?mode=modern"
+          backHref="/notes?mode=modern"
           backLabel="Back to Notes"
-          modeHref={`/blog/${article.slug}`}
+          modeHref={`/notes/${article.slug}`}
           modeLabel="Nostalgia Mode"
         />
 
