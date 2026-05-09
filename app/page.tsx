@@ -199,8 +199,7 @@ export default async function Home({
       .select("id, slug, title, description, live_url, repo_url")
       .eq("visibility", "public")
       .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false })
-      .limit(8),
+      .order("created_at", { ascending: false }),
     supabase
       .from("articles")
       .select("slug, title, excerpt")
