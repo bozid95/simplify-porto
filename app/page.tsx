@@ -156,13 +156,20 @@ function resolveStackLogo(label: string): StackLogoItem | null {
   return stackLogoMap[normalizeTechKey(label)] ?? null;
 }
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string }>;
+}) {
+  const { mode } = await searchParams;
   const supabase = await createClient();
   const [
     { data: profile },
     { data: featuredProject },
     { data: latestArticle },
     { data: stackProjects },
+    { data: nostalgiaProjects },
+    { data: nostalgiaArticles },
     { count: totalProjects },
     { count: totalArticles },
   ] = await Promise.all([
@@ -189,6 +196,19 @@ export default async function Home() {
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
       .limit(18),
+    supabase
+      .from("projects")
+      .select("id, slug, title, description, live_url, repo_url")
+      .eq("visibility", "public")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .limit(8),
+    supabase
+      .from("articles")
+      .select("slug, title, excerpt")
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .limit(8),
     supabase
       .from("projects")
       .select("*", { count: "exact", head: true })
@@ -244,6 +264,79 @@ export default async function Home() {
   const socialItems: SocialItem[] = socialItemCandidates.filter(
     (item): item is SocialItem => Boolean(item.href)
   );
+
+  if (mode === "nostalgia") {
+    return (
+      <main data-mode="nostalgia">
+        <p data-nostalgia-modern>
+          <Link href="/">Modern Mode</Link>
+        </p>
+        <h1>{name}</h1>
+        <p>{tagline}</p>
+        <p>
+          {socialItems.map((item, index) => (
+            <span key={item.label}>
+              {index > 0 && " | "}
+              <a
+                href={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
+              >
+                {item.label}
+              </a>
+            </span>
+          ))}
+        </p>
+        <hr />
+
+        <p>{bio}</p>
+
+        <hr />
+
+        <h2>
+          Recent Writing (<Link href="/blog?mode=nostalgia">All</Link>)
+        </h2>
+        {nostalgiaArticles && nostalgiaArticles.length > 0 ? (
+          <ul>
+            {nostalgiaArticles.map((article) => (
+              <li key={article.slug}>
+                <Link href={`/blog/${article.slug}?mode=nostalgia`}>
+                  {article.title}
+                </Link>
+                {article.excerpt ? `: ${article.excerpt}` : ""}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No notes yet.</p>
+        )}
+
+        <hr />
+
+        <h2>
+          Projects (<Link href="/portfolio?mode=nostalgia">All</Link>)
+        </h2>
+        {nostalgiaProjects && nostalgiaProjects.length > 0 ? (
+          <ul>
+            {nostalgiaProjects.map((project) => (
+              <li key={project.id}>
+                <Link href={`/portfolio/${project.slug || project.id}?mode=nostalgia`}>
+                  {project.title}
+                </Link>
+                {project.description ? `: ${project.description}` : ""}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No projects yet.</p>
+        )}
+
+        <hr />
+        <p>Copyright (C) {new Date().getFullYear()} {name}.</p>
+      </main>
+    );
+  }
+
   const stackCloud = Array.from(
     ((stackProjects as ProjectStackSource[] | null) ?? []).reduce((map, project) => {
       for (const rawTech of project.tech_stack ?? []) {
@@ -305,7 +398,17 @@ export default async function Home() {
                   <div className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground backdrop-blur">
                     Portfolio & Notes
                   </div>
-                  <ThemeToggle className="shrink-0" />
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-full border border-border/60 bg-background/70 px-3 text-xs"
+                      asChild
+                    >
+                      <Link href="/?mode=nostalgia">Nostalgia Mode</Link>
+                    </Button>
+                    <ThemeToggle className="shrink-0" />
+                  </div>
                 </div>
 
                 <div className="flex flex-col items-center gap-3 text-center">

@@ -32,13 +32,82 @@ function normalizeExternalUrl(url?: string | null) {
   return `https://${url}`;
 }
 
-export default async function PortfolioPage() {
+export default async function PortfolioPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string }>;
+}) {
+  const { mode } = await searchParams;
   const supabase = await createClient();
   const { data: projects } = await supabase
     .from("projects")
     .select("*")
     .eq("visibility", "public")
     .order("sort_order", { ascending: true });
+
+  if (mode === "nostalgia") {
+    return (
+      <main data-mode="nostalgia">
+        <p data-nostalgia-modern>
+          <Link href="/portfolio">Modern mode</Link>
+        </p>
+        <h1>Portfolio</h1>
+        <p>
+          <Link href="/?mode=nostalgia">Home</Link> |{" "}
+          <Link href="/blog?mode=nostalgia">Blog</Link>
+        </p>
+        <hr />
+
+        {projects && projects.length > 0 ? (
+          <ul>
+            {projects.map((project) => {
+              const liveUrl = normalizeExternalUrl(project.live_url);
+              const repoUrl = normalizeExternalUrl(project.repo_url);
+
+              return (
+                <li key={project.id}>
+                  <Link href={`/portfolio/${project.slug || project.id}?mode=nostalgia`}>
+                    {project.title}
+                  </Link>
+                  {project.description ? `: ${project.description}` : ""}
+                  <ul>
+                    {project.tech_stack && project.tech_stack.length > 0 && (
+                      <li>Tech stack: {project.tech_stack.join(", ")}</li>
+                    )}
+                    <li>
+                      <Link href={`/portfolio/${project.slug || project.id}?mode=nostalgia`}>
+                        Project details
+                      </Link>
+                      {liveUrl && (
+                        <>
+                          {" "}
+                          |{" "}
+                          <a href={liveUrl} target="_blank" rel="noopener noreferrer">
+                            Live site
+                          </a>
+                        </>
+                      )}
+                      {repoUrl && (
+                        <>
+                          {" "}
+                          |{" "}
+                          <a href={repoUrl} target="_blank" rel="noopener noreferrer">
+                            Source code
+                          </a>
+                        </>
+                      )}
+                    </li>
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p>No projects yet.</p>
+        )}
+      </main>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background px-4 py-6">
@@ -49,7 +118,12 @@ export default async function PortfolioPage() {
       </div>
 
       <div className="relative mx-auto max-w-5xl px-4 py-7 sm:px-6 sm:py-8">
-        <PageNav backHref="/" backLabel="Back" />
+        <PageNav
+          backHref="/"
+          backLabel="Back"
+          modeHref="/portfolio?mode=nostalgia"
+          modeLabel="Nostalgia Mode"
+        />
 
         <div className="mb-8 max-w-2xl">
           <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">

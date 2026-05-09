@@ -17,7 +17,7 @@ const geistMono = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio",
+  title: "Widodo — Portfolio & Notes",
   description: "Personal portfolio & blog",
   icons: {
     icon: "/icon.svg",
@@ -35,6 +35,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ThemeProvider>
           {children}

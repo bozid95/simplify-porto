@@ -1,3 +1,6 @@
+import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,10 +36,13 @@ function normalizeExternalUrl(url?: string | null) {
 
 export default async function ProjectDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ mode?: string }>;
 }) {
   const { slug } = await params;
+  const { mode } = await searchParams;
   const supabase = await createClient();
   
   // Try to find by slug first
@@ -63,6 +69,57 @@ export default async function ProjectDetailPage({
   const liveUrl = normalizeExternalUrl(project.live_url);
   const repoUrl = normalizeExternalUrl(project.repo_url);
 
+  if (mode === "nostalgia") {
+    return (
+      <main data-mode="nostalgia">
+        <p data-nostalgia-modern>
+          <Link href={`/portfolio/${project.slug || project.id}`}>Modern mode</Link>
+        </p>
+        <h1>{project.title}</h1>
+        <p>
+          <Link href="/?mode=nostalgia">Home</Link> |{" "}
+          <Link href="/portfolio?mode=nostalgia">{"<- Back to Portfolio"}</Link>
+        </p>
+        <hr />
+
+        {project.image_url && (
+          <p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={project.image_url} alt={project.title} />
+          </p>
+        )}
+        {project.description && <p>{project.description}</p>}
+        {project.tech_stack?.length > 0 && (
+          <p>Tech stack: {project.tech_stack.join(", ")}</p>
+        )}
+        {(liveUrl || repoUrl) && (
+          <p>
+            {liveUrl && (
+              <a href={liveUrl} target="_blank" rel="noopener noreferrer">
+                Live site
+              </a>
+            )}
+            {liveUrl && repoUrl && " | "}
+            {repoUrl && (
+              <a href={repoUrl} target="_blank" rel="noopener noreferrer">
+                Source code
+              </a>
+            )}
+          </p>
+        )}
+        <hr />
+
+        {project.content ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {project.content}
+          </ReactMarkdown>
+        ) : (
+          <p>No detailed description available for this project.</p>
+        )}
+      </main>
+    );
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       <div className="pointer-events-none absolute inset-0">
@@ -71,7 +128,12 @@ export default async function ProjectDetailPage({
       </div>
 
       <article className="relative mx-auto max-w-5xl px-4 py-7 sm:px-6 sm:py-9">
-        <PageNav backHref="/portfolio" backLabel="Back to Portfolio" />
+        <PageNav
+          backHref="/portfolio"
+          backLabel="Back to Portfolio"
+          modeHref={`/portfolio/${project.slug || project.id}?mode=nostalgia`}
+          modeLabel="Nostalgia Mode"
+        />
 
         <Card className="overflow-hidden rounded-[2rem] border-border/50 bg-card/75 py-0 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl">
           {project.image_url && (

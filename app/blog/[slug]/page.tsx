@@ -1,3 +1,6 @@
+import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,10 +10,13 @@ import { PageNav } from "@/components/page-nav";
 
 export default async function ArticlePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ mode?: string }>;
 }) {
   const { slug } = await params;
+  const { mode } = await searchParams;
   const supabase = await createClient();
   const { data: article } = await supabase
     .from("articles")
@@ -21,6 +27,38 @@ export default async function ArticlePage({
 
   if (!article) notFound();
 
+  if (mode === "nostalgia") {
+    return (
+      <main data-mode="nostalgia">
+        <p data-nostalgia-modern>
+          <Link href={`/blog/${article.slug}`}>Modern mode</Link>
+        </p>
+        <h1>{article.title}</h1>
+        <p>
+          <Link href="/?mode=nostalgia">Home</Link> |{" "}
+          <Link href="/blog?mode=nostalgia">{"<- Back to Blog"}</Link>
+        </p>
+        <p>
+          {new Date(article.created_at).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </p>
+        {article.tags?.length > 0 && <p>Tags: {article.tags.join(", ")}</p>}
+        <hr />
+
+        {article.content ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {article.content}
+          </ReactMarkdown>
+        ) : (
+          <p>No article content yet.</p>
+        )}
+      </main>
+    );
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       <div className="pointer-events-none absolute inset-0">
@@ -29,7 +67,12 @@ export default async function ArticlePage({
       </div>
 
       <article className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-9">
-        <PageNav backHref="/blog" backLabel="Back to Blog" />
+        <PageNav
+          backHref="/blog"
+          backLabel="Back to Blog"
+          modeHref={`/blog/${article.slug}?mode=nostalgia`}
+          modeLabel="Nostalgia Mode"
+        />
 
         <Card className="rounded-[2rem] border-border/50 bg-card/75 py-0 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl">
           <CardContent className="px-5 py-6 sm:px-7 sm:py-8">

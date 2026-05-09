@@ -6,13 +6,61 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { GradientFrame } from "@/components/ui/gradient-frame";
 import { PageNav } from "@/components/page-nav";
 
-export default async function BlogPage() {
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string }>;
+}) {
+  const { mode } = await searchParams;
   const supabase = await createClient();
   const { data: articles } = await supabase
     .from("articles")
     .select("*")
     .eq("published", true)
     .order("created_at", { ascending: false });
+
+  if (mode === "nostalgia") {
+    return (
+      <main data-mode="nostalgia">
+        <p data-nostalgia-modern>
+          <Link href="/blog">Modern mode</Link>
+        </p>
+        <h1>Blog</h1>
+        <p>
+          <Link href="/?mode=nostalgia">Home</Link> |{" "}
+          <Link href="/portfolio?mode=nostalgia">Portfolio</Link>
+        </p>
+        <hr />
+
+        {articles && articles.length > 0 ? (
+          <ul>
+            {articles.map((article) => (
+              <li key={article.id}>
+                <Link href={`/blog/${article.slug}?mode=nostalgia`}>
+                  {article.title}
+                </Link>
+                {article.excerpt ? `: ${article.excerpt}` : ""}
+                <ul>
+                  <li>
+                    {new Date(article.created_at).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </li>
+                  {article.tags && article.tags.length > 0 && (
+                    <li>Tags: {article.tags.join(", ")}</li>
+                  )}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No articles yet.</p>
+        )}
+      </main>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background px-4 py-6">
@@ -23,7 +71,12 @@ export default async function BlogPage() {
       </div>
 
       <div className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-8">
-        <PageNav backHref="/" backLabel="Back" />
+        <PageNav
+          backHref="/"
+          backLabel="Back"
+          modeHref="/blog?mode=nostalgia"
+          modeLabel="Nostalgia Mode"
+        />
 
         <div className="mb-8 max-w-2xl">
           <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">

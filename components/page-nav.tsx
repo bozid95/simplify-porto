@@ -18,9 +18,13 @@ function ArrowLeftIcon() {
 export function PageNav({
   backHref,
   backLabel,
+  modeHref,
+  modeLabel,
 }: {
   backHref: string;
   backLabel: string;
+  modeHref?: string;
+  modeLabel?: string;
 }) {
   const [showFloatingNav, setShowFloatingNav] = useState(false);
 
@@ -51,7 +55,19 @@ export function PageNav({
             {backLabel}
           </Link>
         </Button>
-        <ThemeToggle className="shrink-0" />
+        <div className="flex shrink-0 items-center gap-2">
+          {modeHref && modeLabel && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full border-border/60 bg-background/70 px-4 backdrop-blur-sm"
+              asChild
+            >
+              <Link href={modeHref}>{modeLabel}</Link>
+            </Button>
+          )}
+          <ThemeToggle className="shrink-0" />
+        </div>
       </div>
 
       <div
@@ -72,7 +88,19 @@ export function PageNav({
               {backLabel}
             </Link>
           </Button>
-          <ThemeToggle className="pointer-events-auto shrink-0" />
+          <div className="flex shrink-0 items-center gap-2">
+            {modeHref && modeLabel && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="pointer-events-auto rounded-full border-border/60 bg-background/72 px-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-xl"
+                asChild
+              >
+                <Link href={modeHref}>{modeLabel}</Link>
+              </Button>
+            )}
+            <ThemeToggle className="pointer-events-auto shrink-0" />
+          </div>
         </div>
       </div>
     </>
