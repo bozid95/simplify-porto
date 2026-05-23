@@ -17,7 +17,7 @@ const geistMono = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Widodo — Portfolio & Notes",
+  title: "Widodo — Backend Developer",
   description: "Personal portfolio & blog",
   icons: {
     icon: "/icon.svg",
