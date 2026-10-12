@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 function detectDeviceType(userAgent: string) {
   if (/tablet|ipad/i.test(userAgent)) return "Tablet";
@@ -35,15 +34,21 @@ export function AnalyticsTracker() {
 
     const trackView = async () => {
       try {
-        const supabase = createClient();
         const userAgent = window.navigator.userAgent;
         const canonicalPath = normalizeAnalyticsPath(pathname);
         const deviceType = detectDeviceType(userAgent);
 
-        await supabase.from("analytics").insert({
-          path: canonicalPath,
-          device_type: deviceType,
-          session_id: sessionId,
+        await fetch("/api/analytics", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            path: canonicalPath,
+            device_type: deviceType,
+            session_id: sessionId,
+          }),
+          keepalive: true,
         });
       } catch {
         // Analytics must never interrupt page usage.

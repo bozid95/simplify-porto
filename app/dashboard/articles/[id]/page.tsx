@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef, useId } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,25 +10,88 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { parseMarkdownFile, downloadMarkdownFile } from "@/lib/markdown-file";
 import { toast } from "sonner";
-
-const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 function ArrowLeftIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12 19-7-7 7-7" /><path d="M19 12H5" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m12 19-7-7 7-7" />
+      <path d="M19 12H5" />
     </svg>
   );
+}
+
+function UploadIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" x2="12" y1="3" y2="15" />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" x2="12" y1="15" y2="3" />
+    </svg>
+  );
+}
+
+function generateSlug(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
 }
 
 export default function EditArticlePage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputId = useId();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editorMode, setEditorMode] = useState<"write" | "preview">("write");
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -41,7 +103,11 @@ export default function EditArticlePage() {
 
   const loadArticle = useCallback(async () => {
     const supabase = createClient();
-    const { data } = await supabase.from("articles").select("*").eq("id", id).single();
+    const { data } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("id", id)
+      .single();
     if (data) {
       setForm({
         title: data.title,
@@ -62,6 +128,66 @@ export default function EditArticlePage() {
 
     return () => window.clearTimeout(timeoutId);
   }, [loadArticle]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (
+      !file.name.endsWith(".md") &&
+      !file.name.endsWith(".markdown") &&
+      !file.name.endsWith(".txt")
+    ) {
+      toast.error("Harap unggah file berekstensi .md");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+
+      const parsed = parseMarkdownFile(text);
+
+      setForm((prev) => ({
+        ...prev,
+        title: parsed.title || prev.title,
+        slug: parsed.slug || prev.slug,
+        excerpt: parsed.excerpt || prev.excerpt,
+        tags: parsed.tags || prev.tags,
+        content: parsed.content,
+      }));
+
+      toast.success(`File ${file.name} berhasil dimuat ke editor!`);
+    };
+
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleExportMd = () => {
+    if (!form.content.trim()) {
+      toast.error("Konten artikel masih kosong untuk diekspor");
+      return;
+    }
+
+    const frontmatter = [
+      "---",
+      `title: "${form.title || "Untitled"}"`,
+      `slug: "${form.slug || generateSlug(form.title || "untitled")}"`,
+      form.excerpt ? `excerpt: "${form.excerpt}"` : null,
+      form.tags ? `tags: [${form.tags}]` : null,
+      "---",
+      "",
+      form.content,
+    ]
+      .filter((line) => line !== null)
+      .join("\n");
+
+    const fileName = form.slug || generateSlug(form.title || "article");
+    downloadMarkdownFile(fileName, frontmatter);
+    toast.success("File .md berhasil diunduh");
+  };
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -87,9 +213,9 @@ export default function EditArticlePage() {
 
     setSaving(false);
     if (error) {
-      toast.error("Failed to update article");
+      toast.error("Gagal memperbarui artikel: " + error.message);
     } else {
-      toast.success("Article updated!");
+      toast.success("Artikel berhasil disimpan!");
       router.push("/dashboard/articles");
     }
   }
@@ -97,7 +223,7 @@ export default function EditArticlePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <p className="text-sm text-muted-foreground">Memuat artikel...</p>
       </div>
     );
   }
@@ -107,27 +233,71 @@ export default function EditArticlePage() {
       <Button variant="ghost" size="sm" className="mb-6 gap-2" asChild>
         <Link href="/dashboard/articles">
           <ArrowLeftIcon />
-          Back to Articles
+          Kembali ke Artikel
         </Link>
       </Button>
 
-      <p className="mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Publishing</p>
-      <h1 className="text-2xl font-semibold tracking-tight mb-6">Edit Article</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <p className="mb-1 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Publishing
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Edit Artikel
+          </h1>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            id={fileInputId}
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept=".md,.markdown,.txt"
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-2 cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <UploadIcon />
+            Import File .md
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleExportMd}
+          >
+            <DownloadIcon />
+            Export .md
+          </Button>
+        </div>
+      </div>
 
       <form onSubmit={handleSave}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base font-semibold tracking-tight">Article Details</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">
+                  Detail Artikel
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
+                  <Label htmlFor="title">Judul *</Label>
                   <Input
                     id="title"
                     value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, title: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -140,11 +310,13 @@ export default function EditArticlePage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="excerpt">Excerpt</Label>
+                  <Label htmlFor="excerpt">Ringkasan (Excerpt)</Label>
                   <Textarea
                     id="excerpt"
                     value={form.excerpt}
-                    onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, excerpt: e.target.value })
+                    }
                     rows={2}
                   />
                 </div>
@@ -152,18 +324,61 @@ export default function EditArticlePage() {
             </Card>
 
             <Card className="border-border/40">
-              <CardHeader>
-                <CardTitle className="text-base font-semibold tracking-tight">Content</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <div>
+                  <CardTitle className="text-base font-semibold tracking-tight">
+                    Konten (Markdown)
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Tulis format markdown murni atau unggah file .md Anda
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setEditorMode("write")}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                      editorMode === "write"
+                        ? "bg-background text-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Tulis
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditorMode("preview")}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                      editorMode === "preview"
+                        ? "bg-background text-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Preview
+                  </button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div data-color-mode="dark">
-                  <MDEditor
+                {editorMode === "write" ? (
+                  <Textarea
                     value={form.content}
-                    onChange={(val) => setForm({ ...form, content: val || "" })}
-                    height={500}
-                    preview="edit"
+                    onChange={(e) =>
+                      setForm({ ...form, content: e.target.value })
+                    }
+                    placeholder="# Tulis judul atau isi artikel disini dalam format Markdown (bisa paste atau import .md file)..."
+                    className="min-h-[500px] font-mono text-sm leading-relaxed p-4 border-border/50 focus-visible:ring-1 resize-y"
                   />
-                </div>
+                ) : (
+                  <div className="min-h-[500px] rounded-lg border border-border/50 bg-card/60 p-5 overflow-auto">
+                    {form.content ? (
+                      <MarkdownRenderer content={form.content} />
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">
+                        Belum ada konten untuk ditampilkan.
+                      </p>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -171,28 +386,40 @@ export default function EditArticlePage() {
           <div className="space-y-6">
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base font-semibold tracking-tight">Publishing</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">
+                  Publikasi
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                 <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="published"
                     checked={form.published}
-                    onChange={(e) => setForm({ ...form, published: e.target.checked })}
+                    onChange={(e) =>
+                      setForm({ ...form, published: e.target.checked })
+                    }
                     className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                   />
-                  <Label htmlFor="published" className="cursor-pointer font-medium">
-                    Published
+                  <Label
+                    htmlFor="published"
+                    className="cursor-pointer font-medium"
+                  >
+                    Terbitkan langsung
                   </Label>
                 </div>
                 <Separator />
                 <div className="flex flex-col gap-3 pt-2">
                   <Button type="submit" disabled={saving} className="w-full">
-                    {saving ? "Saving..." : "Save Changes"}
+                    {saving ? "Menyimpan..." : "Simpan Perubahan"}
                   </Button>
-                   <Button type="button" variant="outline" asChild className="w-full">
-                    <Link href="/dashboard/articles">Cancel</Link>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    asChild
+                    className="w-full"
+                  >
+                    <Link href="/dashboard/articles">Batal</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -200,7 +427,9 @@ export default function EditArticlePage() {
 
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-base font-semibold tracking-tight">Metadata</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">
+                  Metadata
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -211,7 +440,9 @@ export default function EditArticlePage() {
                     onChange={(e) => setForm({ ...form, tags: e.target.value })}
                     placeholder="javascript, react, tutorial"
                   />
-                  <p className="text-xs text-muted-foreground">Comma-separated</p>
+                  <p className="text-xs text-muted-foreground">
+                    Pisahkan dengan koma
+                  </p>
                 </div>
               </CardContent>
             </Card>

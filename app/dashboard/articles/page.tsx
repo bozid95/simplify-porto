@@ -33,6 +33,12 @@ interface Article {
   views?: number;
 }
 
+type AnalyticsPathRow = {
+  path: string | null;
+};
+
+const ANALYTICS_PAGE_SIZE = 1000;
+
 function normalizePublicPath(path: string) {
   const withoutQuery = path.split("?")[0] || "/";
   if (withoutQuery === "/blog") return "/notes";
@@ -42,17 +48,63 @@ function normalizePublicPath(path: string) {
   return withoutQuery;
 }
 
+async function fetchAnalyticsPathRows() {
+  const supabase = createClient();
+  const rows: AnalyticsPathRow[] = [];
+  let page = 0;
+
+  while (true) {
+    const from = page * ANALYTICS_PAGE_SIZE;
+    const to = from + ANALYTICS_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("analytics")
+      .select("path")
+      .range(from, to);
+
+    if (error) throw error;
+
+    const batch = (data as AnalyticsPathRow[] | null) || [];
+    rows.push(...batch);
+
+    if (batch.length < ANALYTICS_PAGE_SIZE) break;
+    page += 1;
+  }
+
+  return rows;
+}
+
 function PlusIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14" /><path d="M12 5v14" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
     </svg>
   );
 }
 
 function PenIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
     </svg>
   );
@@ -60,15 +112,37 @@ function PenIcon() {
 
 function TrashIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 6h18" />
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
     </svg>
   );
 }
 
 function FilterIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
     </svg>
   );
@@ -78,17 +152,19 @@ export default function ArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "published" | "draft"
+  >("all");
 
   const loadArticles = useCallback(async () => {
     const supabase = createClient();
-    
+
     // Fetch articles
     const { data: articlesData } = await supabase
       .from("articles")
       .select("*")
       .order("created_at", { ascending: false });
-      
+
     if (!articlesData) {
       setArticles([]);
       setLoading(false);
@@ -96,17 +172,18 @@ export default function ArticlesPage() {
     }
 
     // Fetch raw view paths so the dashboard updates without waiting for rollups.
-    const { data: analyticsData } = await supabase
-      .from("analytics")
-      .select("path");
-      
+    const analyticsData = await fetchAnalyticsPathRows();
+
     // Count views for each article. Keep legacy /blog paths compatible with /notes.
-    const articlesWithViews = articlesData.map(article => {
-      const views = analyticsData?.reduce((total, row) => {
-        return normalizePublicPath(row.path || "") === `/notes/${article.slug}`
-          ? total + 1
-          : total;
-      }, 0) || 0;
+    const articlesWithViews = articlesData.map((article) => {
+      const views =
+        analyticsData?.reduce((total, row) => {
+          const normalized = normalizePublicPath(row.path || "");
+          return normalized === `/notes/${article.slug}` ||
+            normalized === `/blog/${article.slug}`
+            ? total + 1
+            : total;
+        }, 0) || 0;
       return { ...article, views };
     });
 
@@ -141,17 +218,23 @@ export default function ArticlesPage() {
       .eq("id", article.id);
     if (error) toast.error("Failed to update article");
     else {
-      toast.success(article.published ? "Article unpublished" : "Article published!");
+      toast.success(
+        article.published ? "Article unpublished" : "Article published!",
+      );
       loadArticles();
     }
   }
-  
-  const filteredArticles = articles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = 
-      statusFilter === "all" ? true :
-      statusFilter === "published" ? article.published :
-      !article.published;
+
+  const filteredArticles = articles.filter((article) => {
+    const matchesSearch = article.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all"
+        ? true
+        : statusFilter === "published"
+          ? article.published
+          : !article.published;
     return matchesSearch && matchesStatus;
   });
 
@@ -184,8 +267,8 @@ export default function ArticlesPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Input 
-          placeholder="Search articles..." 
+        <Input
+          placeholder="Search articles..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
@@ -194,13 +277,20 @@ export default function ArticlesPage() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2">
               <FilterIcon />
-              Filter: {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+              Filter:{" "}
+              {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setStatusFilter("all")}>All</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter("published")}>Published</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter("draft")}>Draft</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("all")}>
+              All
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("published")}>
+              Published
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("draft")}>
+              Draft
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -228,7 +318,7 @@ export default function ArticlesPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="font-normal text-xs">
-                       {article.views?.toLocaleString()} 
+                      {article.views?.toLocaleString()}
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
@@ -249,7 +339,12 @@ export default function ArticlesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        asChild
+                      >
                         <Link href={`/dashboard/articles/${article.id}`}>
                           <PenIcon />
                         </Link>
@@ -271,14 +366,16 @@ export default function ArticlesPage() {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-16 border border-dashed border-border/40 rounded-lg">
-          <p className="text-muted-foreground text-sm mb-4">No articles found</p>
+          <p className="text-muted-foreground text-sm mb-4">
+            No articles found
+          </p>
           {articles.length === 0 && (
-             <Button asChild>
-             <Link href="/dashboard/articles/new" className="gap-2">
-               <PlusIcon />
-               Write your first article
-             </Link>
-           </Button>
+            <Button asChild>
+              <Link href="/dashboard/articles/new" className="gap-2">
+                <PlusIcon />
+                Write your first article
+              </Link>
+            </Button>
           )}
         </div>
       )}

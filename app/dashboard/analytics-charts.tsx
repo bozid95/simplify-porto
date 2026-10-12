@@ -16,10 +16,17 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { format, startOfDay, subDays } from "date-fns";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+const ANALYTICS_PAGE_SIZE = 1000;
 
 type RawAnalyticsRow = {
   path: string;
@@ -60,6 +67,33 @@ function normalizePublicPath(path: string) {
   return withoutQuery;
 }
 
+async function fetchAnalyticsRowsSince(startDate: Date) {
+  const supabase = createClient();
+  const rows: RawAnalyticsRow[] = [];
+  let page = 0;
+
+  while (true) {
+    const from = page * ANALYTICS_PAGE_SIZE;
+    const to = from + ANALYTICS_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("analytics")
+      .select("path, device_type, session_id, created_at")
+      .gte("created_at", startDate.toISOString())
+      .order("created_at", { ascending: true })
+      .range(from, to);
+
+    if (error) throw error;
+
+    const batch = (data as RawAnalyticsRow[] | null) || [];
+    rows.push(...batch);
+
+    if (batch.length < ANALYTICS_PAGE_SIZE) break;
+    page += 1;
+  }
+
+  return rows;
+}
+
 export function AnalyticsCharts() {
   const [data, setData] = useState<AnalyticsState>({
     dailyViews: [],
@@ -74,20 +108,8 @@ export function AnalyticsCharts() {
     const timeoutId = window.setTimeout(() => {
       void (async () => {
         try {
-          const supabase = createClient();
           const startDate = subDays(startOfDay(new Date()), 29);
-
-          const { data: rawAnalytics, error: rawAnalyticsError } = await supabase
-            .from("analytics")
-            .select("path, device_type, session_id, created_at")
-            .gte("created_at", startDate.toISOString())
-            .order("created_at", { ascending: true });
-
-          if (rawAnalyticsError) {
-            throw rawAnalyticsError;
-          }
-
-          const rows = (rawAnalytics as RawAnalyticsRow[] | null) || [];
+          const rows = await fetchAnalyticsRowsSince(startDate);
 
           const dailyMap = new Map<string, number>();
           const dailyVisitors = new Map<string, Set<string>>();
@@ -102,36 +124,48 @@ export function AnalyticsCharts() {
           const deviceMap = new Map<string, number>();
           const totalVisitors = new Set<string>();
 
-          rows.forEach((row, index) => {
+          rows.forEach((row) => {
             const dateKey = format(new Date(row.created_at), "yyyy-MM-dd");
-            const visitorId = row.session_id || `anonymous-${index}`;
+            const visitorId = row.session_id ? row.session_id.trim() : null;
             const path = normalizePublicPath(row.path || "/");
             const device = row.device_type || "Desktop";
 
             dailyMap.set(dateKey, (dailyMap.get(dateKey) || 0) + 1);
-            dailyVisitors.get(dateKey)?.add(visitorId);
-            totalVisitors.add(visitorId);
+            if (visitorId) {
+              dailyVisitors.get(dateKey)?.add(visitorId);
+              totalVisitors.add(visitorId);
+            }
             pathMap.set(path, (pathMap.get(path) || 0) + 1);
             deviceMap.set(device, (deviceMap.get(device) || 0) + 1);
           });
 
-          const dailyViews = Array.from(dailyMap.entries()).map(([rawDate, views]) => ({
-            date: formatChartDate(new Date(`${rawDate}T00:00:00`)),
-            views,
-          }));
+          const dailyViews = Array.from(dailyMap.entries()).map(
+            ([rawDate, views]) => ({
+              date: formatChartDate(new Date(`${rawDate}T00:00:00`)),
+              views,
+            }),
+          );
 
           const totalViews = rows.length;
-          const uniqueVisitors = totalVisitors.size;
+          // Jika tidak ada session_id terdata sama sekali, fallback ke perkiraan konservatif
+          const uniqueVisitors =
+            totalVisitors.size > 0
+              ? totalVisitors.size
+              : totalViews > 0
+                ? 1
+                : 0;
 
           const topPages = Array.from(pathMap.entries())
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value)
             .slice(0, 5);
 
-          const devices = Array.from(deviceMap.entries()).map(([name, value]) => ({
-            name,
-            value,
-          }));
+          const devices = Array.from(deviceMap.entries()).map(
+            ([name, value]) => ({
+              name,
+              value,
+            }),
+          );
 
           setData({
             dailyViews,
@@ -169,7 +203,9 @@ export function AnalyticsCharts() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totalViews.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {data.totalViews.toLocaleString()}
+            </div>
           </CardContent>
         </Card>
         <Card className="border-border/60 shadow-sm">
@@ -179,7 +215,9 @@ export function AnalyticsCharts() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.uniqueVisitors.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {data.uniqueVisitors.toLocaleString()}
+            </div>
           </CardContent>
         </Card>
         <Card className="border-border/60 shadow-sm">
@@ -202,7 +240,9 @@ export function AnalyticsCharts() {
         <Card className="col-span-4 border-border/60 shadow-sm">
           <CardHeader>
             <CardTitle>Visitor Trends</CardTitle>
-            <CardDescription>Daily page views for the last 30 days</CardDescription>
+            <CardDescription>
+              Daily page views for the last 30 days
+            </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[300px] w-full">
@@ -224,7 +264,10 @@ export function AnalyticsCharts() {
                     tickFormatter={(value) => `${value}`}
                   />
                   <Tooltip
-                    contentStyle={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}
+                    contentStyle={{
+                      backgroundColor: "var(--background)",
+                      borderColor: "var(--border)",
+                    }}
                     itemStyle={{ color: "var(--foreground)" }}
                   />
                   <Line
@@ -261,18 +304,27 @@ export function AnalyticsCharts() {
                     dataKey="value"
                   >
                     {data.devices.map((entry, index) => (
-                      <Cell key={`cell-${entry.name}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell
+                        key={`cell-${entry.name}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}
+                    contentStyle={{
+                      backgroundColor: "var(--background)",
+                      borderColor: "var(--border)",
+                    }}
                     itemStyle={{ color: "var(--foreground)" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
               <div className="mt-4 flex justify-center gap-4">
                 {data.devices.map((entry, index) => (
-                  <div key={entry.name} className="flex items-center gap-2 text-sm">
+                  <div
+                    key={entry.name}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <div
                       className="h-3 w-3 rounded-full"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
@@ -294,8 +346,16 @@ export function AnalyticsCharts() {
         <CardContent>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.topPages} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.3} />
+              <BarChart
+                data={data.topPages}
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  horizontal={false}
+                  opacity={0.3}
+                />
                 <XAxis type="number" hide />
                 <YAxis
                   dataKey="name"
@@ -306,10 +366,18 @@ export function AnalyticsCharts() {
                 />
                 <Tooltip
                   cursor={{ fill: "transparent" }}
-                  contentStyle={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}
+                  contentStyle={{
+                    backgroundColor: "var(--background)",
+                    borderColor: "var(--border)",
+                  }}
                   itemStyle={{ color: "var(--foreground)" }}
                 />
-                <Bar dataKey="value" fill="#82ca9d" radius={[0, 4, 4, 0]} barSize={30} />
+                <Bar
+                  dataKey="value"
+                  fill="#82ca9d"
+                  radius={[0, 4, 4, 0]}
+                  barSize={30}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>

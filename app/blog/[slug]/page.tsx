@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
-import { ArticleContent } from "./article-content";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { PageNav } from "@/components/page-nav";
 
 export async function generateMetadata({
@@ -80,9 +78,7 @@ export default async function ArticlePage({
         <hr />
 
         {article.content ? (
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {article.content}
-          </ReactMarkdown>
+          <MarkdownRenderer content={article.content} />
         ) : (
           <p>No note content yet.</p>
         )}
@@ -136,7 +132,7 @@ export default async function ArticlePage({
               )}
             </header>
 
-            <ArticleContent content={article.content} />
+            <MarkdownRenderer content={article.content} />
           </CardContent>
         </Card>
       </article>
