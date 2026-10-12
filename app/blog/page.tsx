@@ -34,8 +34,7 @@ export default async function BlogPage({
         </p>
         <h1>Notes</h1>
         <p>
-          <Link href="/">Home</Link> |{" "}
-          <Link href="/portfolio">Portfolio</Link>
+          <Link href="/">Home</Link> | <Link href="/portfolio">Portfolio</Link>
         </p>
         <hr />
 
@@ -43,14 +42,13 @@ export default async function BlogPage({
           <ul>
             {articles.map((article) => (
               <li key={article.id}>
-                <Link href={`/notes/${article.slug}`}>
-                  {article.title}
-                </Link>
-                {truncateText(article.excerpt) ? `: ${truncateText(article.excerpt)}` : ""}
-                {" "}
+                <Link href={`/notes/${article.slug}`}>{article.title}</Link>
+                {truncateText(article.excerpt)
+                  ? `: ${truncateText(article.excerpt)}`
+                  : ""}{" "}
                 <Link href={`/notes/${article.slug}`}>Read more...</Link>
                 <ul>
-                  <li>
+                  <li suppressHydrationWarning>
                     {new Date(article.created_at).toLocaleDateString("id-ID", {
                       year: "numeric",
                       month: "short",
@@ -74,8 +72,14 @@ export default async function BlogPage({
   return (
     <div className="relative min-h-screen overflow-hidden bg-background px-4 py-6">
       <div className="pointer-events-none absolute inset-0">
-        <Spotlight className="right-0 top-0 h-72 w-72 translate-x-1/3" fill="rgba(120,120,120,0.18)" />
-        <Spotlight className="left-0 top-1/3 h-80 w-80 -translate-x-1/4" fill="rgba(160,160,160,0.14)" />
+        <Spotlight
+          className="right-0 top-0 h-72 w-72 translate-x-1/3"
+          fill="rgba(120,120,120,0.18)"
+        />
+        <Spotlight
+          className="left-0 top-1/3 h-80 w-80 -translate-x-1/4"
+          fill="rgba(160,160,160,0.14)"
+        />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_35%)]" />
       </div>
 
@@ -100,51 +104,65 @@ export default async function BlogPage({
           <div className="grid gap-3.5">
             {articles.map((article, index) => {
               const delayClass =
-                index % 4 === 0 ? "" :
-                index % 4 === 1 ? " delay-100" :
-                index % 4 === 2 ? " delay-180" :
-                " delay-260";
+                index % 4 === 0
+                  ? ""
+                  : index % 4 === 1
+                    ? " delay-100"
+                    : index % 4 === 2
+                      ? " delay-180"
+                      : " delay-260";
 
               return (
-              <Link key={article.id} href={`/notes/${article.slug}?mode=modern`} className={`group animate-fade-up-soft${delayClass}`}>
-                <GradientFrame className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_70px_rgba(0,0,0,0.12)]">
-                  <Card className="cursor-pointer rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
-                    <CardHeader className="pb-2 pt-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <CardTitle className="text-lg font-semibold transition-colors group-hover:text-primary sm:text-[1.15rem]">
-                          {article.title}
-                        </CardTitle>
-                        <span className="shrink-0 rounded-full border border-border/50 bg-background/70 px-3 py-1 text-[11px] font-medium text-muted-foreground">
-                          {new Date(article.created_at).toLocaleDateString("id-ID", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pb-5">
-                      <p className="mb-3 text-sm leading-6 text-muted-foreground">
-                        {article.excerpt}
-                      </p>
-                      {article.tags && article.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {article.tags.map((tag: string) => (
-                            <Badge
-                              key={tag}
-                              variant="secondary"
-                              className="rounded-full border border-border/40 bg-background/70 px-3 py-1 text-[11px] font-medium"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
+                <Link
+                  key={article.id}
+                  href={`/notes/${article.slug}?mode=modern`}
+                  className={`group animate-fade-up-soft${delayClass}`}
+                >
+                  <GradientFrame className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_70px_rgba(0,0,0,0.12)]">
+                    <Card className="cursor-pointer rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
+                      <CardHeader className="pb-2 pt-5">
+                        <div className="flex items-start justify-between gap-4">
+                          <CardTitle className="text-lg font-semibold transition-colors group-hover:text-primary sm:text-[1.15rem]">
+                            {article.title}
+                          </CardTitle>
+                          <span
+                            suppressHydrationWarning
+                            className="shrink-0 rounded-full border border-border/50 bg-background/70 px-3 py-1 text-[11px] font-medium text-muted-foreground"
+                          >
+                            {new Date(article.created_at).toLocaleDateString(
+                              "id-ID",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )}
+                          </span>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </GradientFrame>
-              </Link>
-            )})}
+                      </CardHeader>
+                      <CardContent className="pb-5">
+                        <p className="mb-3 text-sm leading-6 text-muted-foreground">
+                          {article.excerpt}
+                        </p>
+                        {article.tags && article.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {article.tags.map((tag: string) => (
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="rounded-full border border-border/40 bg-background/70 px-3 py-1 text-[11px] font-medium"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </GradientFrame>
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <GradientFrame>

@@ -10,6 +10,7 @@ function Spotlight({
   return (
     <div
       aria-hidden="true"
+      suppressHydrationWarning
       className={cn(
         "pointer-events-none absolute rounded-full opacity-90 blur-3xl",
         className

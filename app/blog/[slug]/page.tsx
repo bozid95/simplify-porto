@@ -67,7 +67,7 @@ export default async function ArticlePage({
           <Link href="/">Home</Link> |{" "}
           <Link href="/notes">{"<- Back to Notes"}</Link>
         </p>
-        <p>
+        <p suppressHydrationWarning>
           {new Date(article.created_at).toLocaleDateString("en-US", {
             month: "long",
             day: "numeric",
@@ -107,7 +107,10 @@ export default async function ArticlePage({
               <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                 Note
               </p>
-              <time className="inline-flex rounded-full border border-border/50 bg-background/70 px-3 py-1 text-[11px] font-medium text-muted-foreground">
+              <time
+                suppressHydrationWarning
+                className="inline-flex rounded-full border border-border/50 bg-background/70 px-3 py-1 text-[11px] font-medium text-muted-foreground"
+              >
                 {new Date(article.created_at).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
