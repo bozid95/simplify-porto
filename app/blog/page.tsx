@@ -29,42 +29,87 @@ export default async function BlogPage({
   if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
-        <p data-nostalgia-modern>
-          <Link href="/notes?mode=modern">Modern mode</Link>
+        {/* Wikipedia Header */}
+        <header className="wiki-header">
+          <Link href="/" className="wiki-logo">
+            <span className="wiki-logo-mark">W</span>
+            <span>Notes & Articles</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <nav className="wiki-nav">
+              <Link href="/" className="wiki-nav-item">
+                Home
+              </Link>
+              <Link href="/portfolio" className="wiki-nav-item">
+                Projects
+              </Link>
+              <Link href="/notes" className="wiki-nav-item active">
+                Notes
+              </Link>
+            </nav>
+            <Link href="/notes?mode=modern" className="wiki-switch-mode">
+              Switch to Modern &rarr;
+            </Link>
+          </div>
+        </header>
+
+        <h1>Notes & Articles</h1>
+        <p className="wiki-site-sub">
+          Archive of engineering notes, design patterns, and programming
+          tutorials.
         </p>
-        <h1>Notes</h1>
-        <p>
-          <Link href="/">Home</Link> | <Link href="/portfolio">Portfolio</Link>
-        </p>
-        <hr />
 
         {articles && articles.length > 0 ? (
-          <ul>
+          <div className="space-y-3 my-4">
             {articles.map((article) => (
-              <li key={article.id}>
-                <Link href={`/notes/${article.slug}`}>{article.title}</Link>
-                {truncateText(article.excerpt)
-                  ? `: ${truncateText(article.excerpt)}`
-                  : ""}{" "}
-                <Link href={`/notes/${article.slug}`}>Read more...</Link>
-                <ul>
-                  <li suppressHydrationWarning>
-                    {new Date(article.created_at).toLocaleDateString("id-ID", {
+              <article key={article.id} className="wiki-entry">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="wiki-entry-title">
+                    <Link href={`/notes/${article.slug}`}>{article.title}</Link>
+                  </span>
+                  <span
+                    suppressHydrationWarning
+                    className="text-xs text-[var(--wiki-muted)]"
+                  >
+                    {new Date(article.created_at).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
-                  </li>
-                  {article.tags && article.tags.length > 0 && (
-                    <li>Tags: {article.tags.join(", ")}</li>
-                  )}
-                </ul>
-              </li>
+                  </span>
+                </div>
+
+                {article.excerpt && (
+                  <p className="my-1.5 text-sm text-[var(--wiki-muted)]">
+                    {truncateText(article.excerpt, 180)}
+                  </p>
+                )}
+
+                <div className="wiki-entry-meta flex flex-wrap items-center justify-between gap-2 mt-2">
+                  <div className="flex flex-wrap gap-1">
+                    {article.tags?.map((tag: string) => (
+                      <span key={tag} className="wiki-tag">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                  <Link href={`/notes/${article.slug}`}>
+                    Read full note &rarr;
+                  </Link>
+                </div>
+              </article>
             ))}
-          </ul>
+          </div>
         ) : (
-          <p>No notes yet.</p>
+          <p>No notes published yet.</p>
         )}
+
+        <footer className="wiki-footer">
+          <div>
+            <Link href="/">&larr; Back to Home Article</Link>
+          </div>
+          <div>Text is available under the Wikipedia-nostalgia layout.</div>
+        </footer>
       </main>
     );
   }

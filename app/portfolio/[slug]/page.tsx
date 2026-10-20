@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { PageNav } from "@/components/page-nav";
+import { WikiTableOfContents } from "@/components/wiki-toc";
 
 function ExternalLinkIcon() {
   return (
@@ -138,50 +139,121 @@ export default async function ProjectDetailPage({
   if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
-        <p data-nostalgia-modern>
-          <Link href={`/portfolio/${project.slug || project.id}?mode=modern`}>
-            Modern mode
+        {/* Navigation Bar */}
+        <header className="wiki-header">
+          <Link href="/" className="wiki-logo">
+            <span className="wiki-logo-mark">W</span>
+            <span>Projects</span>
           </Link>
-        </p>
+          <div className="flex items-center gap-3">
+            <nav className="wiki-nav">
+              <Link href="/" className="wiki-nav-item">
+                Home
+              </Link>
+              <Link href="/portfolio" className="wiki-nav-item active">
+                Projects
+              </Link>
+              <Link href="/notes" className="wiki-nav-item">
+                Notes
+              </Link>
+            </nav>
+            <Link
+              href={`/portfolio/${project.slug || project.id}?mode=modern`}
+              className="wiki-switch-mode"
+            >
+              Modern Mode &rarr;
+            </Link>
+          </div>
+        </header>
+
         <h1>{project.title}</h1>
-        <p>
-          <Link href="/">Home</Link> |{" "}
-          <Link href="/portfolio">{"<- Back to Portfolio"}</Link>
-        </p>
-        <hr />
 
-        {project.image_url && (
-          <p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={project.image_url} alt={project.title} />
-          </p>
-        )}
-        {project.description && <p>{project.description}</p>}
-        {project.tech_stack?.length > 0 && (
-          <p>Tech stack: {project.tech_stack.join(", ")}</p>
-        )}
-        {(liveUrl || repoUrl) && (
-          <p>
-            {liveUrl && (
-              <a href={liveUrl} target="_blank" rel="noopener noreferrer">
-                Live site
-              </a>
-            )}
-            {liveUrl && repoUrl && " | "}
-            {repoUrl && (
-              <a href={repoUrl} target="_blank" rel="noopener noreferrer">
-                Source code
-              </a>
-            )}
-          </p>
-        )}
-        <hr />
+        <div className="wiki-article-layout my-6">
+          {/* Left TOC (renders if project has headings) */}
+          {project.content && (
+            <aside className="wiki-toc-aside">
+              <WikiTableOfContents
+                content={project.content}
+                pageTitle={project.title}
+              />
+            </aside>
+          )}
 
-        {project.content ? (
-          <MarkdownRenderer content={project.content} />
-        ) : (
-          <p>No detailed description available for this project.</p>
-        )}
+          {/* Main Content Area */}
+          <article className="min-w-0 w-full">
+            {/* Wikipedia-style Floating Thumbnail wrapped with text */}
+            {project.image_url && (
+              <figure className="wiki-thumb-right">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={project.image_url} alt={project.title} />
+                <figcaption className="wiki-thumb-caption">
+                  {project.title}
+                </figcaption>
+              </figure>
+            )}
+
+            {project.description && (
+              <p className="text-[1.05em] leading-relaxed mb-4 font-medium">
+                {project.description}
+              </p>
+            )}
+
+            {/* Compact Wikipedia attributes if live / repo / tech exists */}
+            {(liveUrl || repoUrl || project.tech_stack?.length > 0) && (
+              <div className="wiki-entry my-3">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                  {project.tech_stack?.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-[var(--wiki-muted)] font-medium">
+                        Technologies:
+                      </span>
+                      {project.tech_stack.map((tech: string) => (
+                        <span key={tech} className="wiki-tag">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {liveUrl && (
+                    <a
+                      href={liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-[var(--wiki-link)]"
+                    >
+                      Visit site ↗
+                    </a>
+                  )}
+
+                  {repoUrl && (
+                    <a
+                      href={repoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-[var(--wiki-link)]"
+                    >
+                      Source code ↗
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {project.content ? (
+              <div className="my-4">
+                <MarkdownRenderer content={project.content} />
+              </div>
+            ) : null}
+          </article>
+        </div>
+
+        <footer className="wiki-footer">
+          <div>
+            <Link href="/portfolio">&larr; Back to all projects</Link>
+          </div>
+          <div>{project.title}</div>
+        </footer>
       </main>
     );
   }

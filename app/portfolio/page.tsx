@@ -9,7 +9,17 @@ import { PageNav } from "@/components/page-nav";
 
 function ExternalLinkIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M15 3h6v6" />
       <path d="M10 14 21 3" />
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -19,7 +29,17 @@ function ExternalLinkIcon() {
 
 function GithubIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
       <path d="M9 18c-4.51 2-5-2-7-2" />
     </svg>
@@ -55,65 +75,110 @@ export default async function PortfolioPage({
   if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
-        <p data-nostalgia-modern>
-          <Link href="/portfolio?mode=modern">Modern mode</Link>
+        {/* Wikipedia Header */}
+        <header className="wiki-header">
+          <Link href="/" className="wiki-logo">
+            <span className="wiki-logo-mark">W</span>
+            <span>Portfolio</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <nav className="wiki-nav">
+              <Link href="/" className="wiki-nav-item">
+                Home
+              </Link>
+              <Link href="/portfolio" className="wiki-nav-item active">
+                Projects
+              </Link>
+              <Link href="/notes" className="wiki-nav-item">
+                Notes
+              </Link>
+            </nav>
+            <Link href="/portfolio?mode=modern" className="wiki-switch-mode">
+              Switch to Modern &rarr;
+            </Link>
+          </div>
+        </header>
+
+        <h1>Engineering Portfolio</h1>
+        <p className="wiki-site-sub">
+          Directory of software engineering systems, client projects, and
+          open-source works.
         </p>
-        <h1>Portfolio</h1>
-        <p>
-          <Link href="/">Home</Link> |{" "}
-          <Link href="/notes">Notes</Link>
-        </p>
-        <hr />
 
         {projects && projects.length > 0 ? (
-          <ul>
+          <div className="space-y-3 my-4">
             {projects.map((project) => {
               const liveUrl = normalizeExternalUrl(project.live_url);
               const repoUrl = normalizeExternalUrl(project.repo_url);
 
               return (
-                <li key={project.id}>
-                  <Link href={`/portfolio/${project.slug || project.id}`}>
-                    {project.title}
-                  </Link>
-                  {truncateText(project.description) ? `: ${truncateText(project.description)}` : ""}
-                  {" "}
-                  <Link href={`/portfolio/${project.slug || project.id}`}>Read more...</Link>
-                  <ul>
-                    {project.tech_stack && project.tech_stack.length > 0 && (
-                      <li>Tech stack: {project.tech_stack.join(", ")}</li>
-                    )}
-                    <li>
+                <article key={project.id} className="wiki-entry">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className="wiki-entry-title">
                       <Link href={`/portfolio/${project.slug || project.id}`}>
-                        Project details
+                        {project.title}
                       </Link>
+                    </span>
+                    <span className="text-xs text-[var(--wiki-muted)]">
+                      <Link href={`/portfolio/${project.slug || project.id}`}>
+                        Details &rarr;
+                      </Link>
+                    </span>
+                  </div>
+
+                  {project.description && (
+                    <p className="my-1.5 text-sm text-[var(--wiki-muted)]">
+                      {truncateText(project.description, 200)}
+                    </p>
+                  )}
+
+                  <div className="wiki-entry-meta flex flex-wrap items-center justify-between gap-2 mt-2">
+                    <div className="flex flex-wrap gap-1">
+                      {project.tech_stack?.map((tech: string) => (
+                        <span key={tech} className="wiki-tag">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="text-xs flex items-center gap-2">
                       {liveUrl && (
-                        <>
-                          {" "}
-                          |{" "}
-                          <a href={liveUrl} target="_blank" rel="noopener noreferrer">
-                            Live site
-                          </a>
-                        </>
+                        <a
+                          href={liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium"
+                        >
+                          Visit site ↗
+                        </a>
                       )}
+                      {liveUrl && repoUrl && <span>&bull;</span>}
                       {repoUrl && (
-                        <>
-                          {" "}
-                          |{" "}
-                          <a href={repoUrl} target="_blank" rel="noopener noreferrer">
-                            Source code
-                          </a>
-                        </>
+                        <a
+                          href={repoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium"
+                        >
+                          Source code ↗
+                        </a>
                       )}
-                    </li>
-                  </ul>
-                </li>
+                    </div>
+                  </div>
+                </article>
               );
             })}
-          </ul>
+          </div>
         ) : (
-          <p>No projects yet.</p>
+          <p>No projects documented yet.</p>
         )}
+
+        <footer className="wiki-footer">
+          <div>
+            <Link href="/">&larr; Back to Home Article</Link>
+          </div>
+          <div>All engineering projects catalogued chronologically.</div>
+        </footer>
       </main>
     );
   }
@@ -121,8 +186,14 @@ export default async function PortfolioPage({
   return (
     <div className="relative min-h-screen overflow-hidden bg-background px-4 py-6">
       <div className="pointer-events-none absolute inset-0">
-        <Spotlight className="left-0 top-0 h-72 w-72 -translate-x-1/3" fill="rgba(120,120,120,0.18)" />
-        <Spotlight className="right-0 top-1/4 h-80 w-80 translate-x-1/4" fill="rgba(160,160,160,0.14)" />
+        <Spotlight
+          className="left-0 top-0 h-72 w-72 -translate-x-1/3"
+          fill="rgba(120,120,120,0.18)"
+        />
+        <Spotlight
+          className="right-0 top-1/4 h-80 w-80 translate-x-1/4"
+          fill="rgba(160,160,160,0.14)"
+        />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_35%)]" />
       </div>
 
@@ -149,82 +220,101 @@ export default async function PortfolioPage({
               const liveUrl = normalizeExternalUrl(project.live_url);
               const repoUrl = normalizeExternalUrl(project.repo_url);
               const delayClass =
-                index % 4 === 0 ? "" :
-                index % 4 === 1 ? " delay-100" :
-                index % 4 === 2 ? " delay-180" :
-                " delay-260";
+                index % 4 === 0
+                  ? ""
+                  : index % 4 === 1
+                    ? " delay-100"
+                    : index % 4 === 2
+                      ? " delay-180"
+                      : " delay-260";
 
               return (
-              <div key={project.id} className={`group relative animate-fade-up-soft${delayClass}`}>
-                <Link href={`/portfolio/${project.slug || project.id}?mode=modern`} className="block h-full">
-                  <GradientFrame className="h-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_80px_rgba(0,0,0,0.14)]">
-                    <Card className="h-full overflow-hidden rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
-                      {project.image_url && (
-                        <div className="aspect-[16/10] w-full overflow-hidden border-b border-border/40 bg-muted/30">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={project.image_url}
-                            alt={project.title}
-                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          />
-                        </div>
-                      )}
-                      <CardHeader className="pb-2 flex-none">
-                        <div className="flex items-start justify-between">
-                          <CardTitle className="text-lg font-semibold transition-colors group-hover:text-primary sm:text-[1.15rem]">
-                            {project.title}
-                          </CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pb-5">
-                        <p className="mb-3 line-clamp-3 text-sm leading-6 text-muted-foreground">
-                          {project.description}
-                        </p>
-                        {project.tech_stack && project.tech_stack.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {project.tech_stack.map((tech: string) => (
-                              <Badge
-                                key={tech}
-                                variant="secondary"
-                                className="rounded-full border border-border/40 bg-background/70 px-3 py-1 text-[11px] font-medium"
-                              >
-                                {tech}
-                              </Badge>
-                            ))}
+                <div
+                  key={project.id}
+                  className={`group relative animate-fade-up-soft${delayClass}`}
+                >
+                  <Link
+                    href={`/portfolio/${project.slug || project.id}?mode=modern`}
+                    className="block h-full"
+                  >
+                    <GradientFrame className="h-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_80px_rgba(0,0,0,0.14)]">
+                      <Card className="h-full overflow-hidden rounded-[calc(1.75rem-1px)] border-0 bg-card/70 py-0 shadow-none backdrop-blur-xl">
+                        {project.image_url && (
+                          <div className="aspect-[16/10] w-full overflow-hidden border-b border-border/40 bg-muted/30">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={project.image_url}
+                              alt={project.title}
+                              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
                           </div>
                         )}
-                      </CardContent>
-                    </Card>
-                  </GradientFrame>
-                </Link>
-                <div className="absolute right-4 top-4 z-10 flex gap-2">
-                  {liveUrl && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 rounded-full border border-border/50 bg-background/75 backdrop-blur-md hover:bg-background"
-                      asChild
-                    >
-                      <a href={liveUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLinkIcon />
-                      </a>
-                    </Button>
-                  )}
-                  {repoUrl && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 rounded-full border border-border/50 bg-background/75 backdrop-blur-md hover:bg-background"
-                      asChild
-                    >
-                      <a href={repoUrl} target="_blank" rel="noopener noreferrer">
-                        <GithubIcon />
-                      </a>
-                    </Button>
-                  )}
+                        <CardHeader className="pb-2 flex-none">
+                          <div className="flex items-start justify-between">
+                            <CardTitle className="text-lg font-semibold transition-colors group-hover:text-primary sm:text-[1.15rem]">
+                              {project.title}
+                            </CardTitle>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pb-5">
+                          <p className="mb-3 line-clamp-3 text-sm leading-6 text-muted-foreground">
+                            {project.description}
+                          </p>
+                          {project.tech_stack &&
+                            project.tech_stack.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {project.tech_stack.map((tech: string) => (
+                                  <Badge
+                                    key={tech}
+                                    variant="secondary"
+                                    className="rounded-full border border-border/40 bg-background/70 px-3 py-1 text-[11px] font-medium"
+                                  >
+                                    {tech}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                        </CardContent>
+                      </Card>
+                    </GradientFrame>
+                  </Link>
+                  <div className="absolute right-4 top-4 z-10 flex gap-2">
+                    {liveUrl && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-full border border-border/50 bg-background/75 backdrop-blur-md hover:bg-background"
+                        asChild
+                      >
+                        <a
+                          href={liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ExternalLinkIcon />
+                        </a>
+                      </Button>
+                    )}
+                    {repoUrl && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-full border border-border/50 bg-background/75 backdrop-blur-md hover:bg-background"
+                        asChild
+                      >
+                        <a
+                          href={repoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <GithubIcon />
+                        </a>
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )})}
+              );
+            })}
           </div>
         ) : (
           <GradientFrame>

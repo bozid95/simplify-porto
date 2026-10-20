@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { PageNav } from "@/components/page-nav";
+import { WikiTableOfContents } from "@/components/wiki-toc";
 
 export async function generateMetadata({
   params,
@@ -59,29 +60,83 @@ export default async function ArticlePage({
   if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
-        <p data-nostalgia-modern>
-          <Link href={`/notes/${article.slug}?mode=modern`}>Modern mode</Link>
-        </p>
-        <h1>{article.title}</h1>
-        <p>
-          <Link href="/">Home</Link> |{" "}
-          <Link href="/notes">{"<- Back to Notes"}</Link>
-        </p>
-        <p suppressHydrationWarning>
-          {new Date(article.created_at).toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </p>
-        {article.tags?.length > 0 && <p>Tags: {article.tags.join(", ")}</p>}
-        <hr />
+        {/* Wikipedia Header */}
+        <header className="wiki-header">
+          <Link href="/" className="wiki-logo">
+            <span className="wiki-logo-mark">W</span>
+            <span>Notes</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <nav className="wiki-nav">
+              <Link href="/" className="wiki-nav-item">
+                Home
+              </Link>
+              <Link href="/portfolio" className="wiki-nav-item">
+                Projects
+              </Link>
+              <Link href="/notes" className="wiki-nav-item active">
+                Notes
+              </Link>
+            </nav>
+            <Link
+              href={`/notes/${article.slug}?mode=modern`}
+              className="wiki-switch-mode"
+            >
+              Modern Mode &rarr;
+            </Link>
+          </div>
+        </header>
 
-        {article.content ? (
-          <MarkdownRenderer content={article.content} />
-        ) : (
-          <p>No note content yet.</p>
-        )}
+        <h1>{article.title}</h1>
+        <div className="wiki-site-sub flex flex-wrap items-center justify-between gap-2">
+          <span suppressHydrationWarning className="text-xs">
+            Published:{" "}
+            {new Date(article.created_at).toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </span>
+          {article.tags?.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="text-xs text-[var(--wiki-muted)] mr-1">
+                Categories:
+              </span>
+              {article.tags.map((tag: string) => (
+                <span key={tag} className="wiki-tag">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Vector 2022 Article Layout with Left Table of Contents */}
+        <div className="wiki-article-layout my-6">
+          {article.content && (
+            <aside className="wiki-toc-aside">
+              <WikiTableOfContents
+                content={article.content}
+                pageTitle={article.title}
+              />
+            </aside>
+          )}
+
+          <article className="min-w-0 w-full">
+            {article.content ? (
+              <MarkdownRenderer content={article.content} />
+            ) : (
+              <p>No note content yet.</p>
+            )}
+          </article>
+        </div>
+
+        <footer className="wiki-footer">
+          <div>
+            <Link href="/notes">&larr; Back to all notes</Link>
+          </div>
+          <div>{article.title}</div>
+        </footer>
       </main>
     );
   }

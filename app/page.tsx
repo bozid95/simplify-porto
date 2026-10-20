@@ -330,79 +330,178 @@ export default async function Home({
   if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
-        <p data-nostalgia-modern>
-          <Link href="/?mode=modern">Modern Mode</Link>
-        </p>
+        {/* Wikipedia Header */}
+        <header className="wiki-header">
+          <Link href="/" className="wiki-logo">
+            <span className="wiki-logo-mark">W</span>
+            <span>{name}</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <nav className="wiki-nav">
+              <Link href="/" className="wiki-nav-item active">
+                Article
+              </Link>
+              <Link href="/portfolio" className="wiki-nav-item">
+                Projects
+              </Link>
+              <Link href="/notes" className="wiki-nav-item">
+                Notes
+              </Link>
+            </nav>
+            <Link href="/?mode=modern" className="wiki-switch-mode">
+              Switch to Modern &rarr;
+            </Link>
+          </div>
+        </header>
+
         <h1>{name}</h1>
-        <p>{tagline}</p>
-        <p>
-          {socialItems.map((item, index) => (
-            <span key={item.label}>
-              {index > 0 && " | "}
-              <a
-                href={item.href}
-                target={item.external ? "_blank" : undefined}
-                rel={item.external ? "noopener noreferrer" : undefined}
-              >
-                {item.label}
-              </a>
-            </span>
-          ))}
+        <p className="wiki-site-sub">
+          Personal biography and engineering directory
         </p>
-        <hr />
 
-        <p>{bio}</p>
+        <div className="wiki-content-grid">
+          {/* Main Article Body */}
+          <div className="min-w-0">
+            <p className="text-[1.05em] leading-relaxed">
+              <strong>{name}</strong> is a{" "}
+              {tagline.toLowerCase() || "software developer"}. {bio}
+            </p>
 
-        <hr />
-
-        <h2>
-          Recent Notes (<Link href="/notes">All</Link>)
-        </h2>
-        {nostalgiaArticles && nostalgiaArticles.length > 0 ? (
-          <ul>
-            {nostalgiaArticles.map((article) => (
-              <li key={article.slug}>
-                <Link href={`/notes/${article.slug}`}>{article.title}</Link>
-                {truncateText(article.excerpt, 110)
-                  ? `: ${truncateText(article.excerpt, 110)}`
-                  : ""}{" "}
-                <Link href={`/notes/${article.slug}`}>Read more...</Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No notes yet.</p>
-        )}
-
-        <hr />
-
-        <h2>
-          Projects (<Link href="/portfolio">All</Link>)
-        </h2>
-        {nostalgiaProjects && nostalgiaProjects.length > 0 ? (
-          <ul>
-            {nostalgiaProjects.map((project) => (
-              <li key={project.id}>
-                <Link href={`/portfolio/${project.slug || project.id}`}>
-                  {project.title}
+            <h2>Recent Notes</h2>
+            {nostalgiaArticles && nostalgiaArticles.length > 0 ? (
+              <>
+                <ul className="wiki-compact-list">
+                  {nostalgiaArticles.slice(0, 3).map((article) => (
+                    <li key={article.slug}>
+                      <Link
+                        href={`/notes/${article.slug}`}
+                        className="font-semibold"
+                      >
+                        {article.title}
+                      </Link>
+                      {article.excerpt
+                        ? ` — ${truncateText(article.excerpt, 100)}`
+                        : ""}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/notes" className="wiki-see-all">
+                  Show all notes ({totalArticles || 0}) &rarr;
                 </Link>
-                {truncateText(project.description, 110)
-                  ? `: ${truncateText(project.description, 110)}`
-                  : ""}{" "}
-                <Link href={`/portfolio/${project.slug || project.id}`}>
-                  Read more...
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No projects yet.</p>
-        )}
+              </>
+            ) : (
+              <p>No notes published yet.</p>
+            )}
 
-        <hr />
-        <p>
-          Copyright (C) {new Date().getFullYear()} {name}.
-        </p>
+            <h2>Selected Projects</h2>
+            {nostalgiaProjects && nostalgiaProjects.length > 0 ? (
+              <>
+                <ul className="wiki-compact-list">
+                  {nostalgiaProjects.slice(0, 4).map((project) => (
+                    <li key={project.id}>
+                      <Link
+                        href={`/portfolio/${project.slug || project.id}`}
+                        className="font-semibold"
+                      >
+                        {project.title}
+                      </Link>
+                      {project.description
+                        ? ` — ${truncateText(project.description, 95)}`
+                        : ""}
+                      {project.live_url && (
+                        <span className="text-xs text-[var(--wiki-muted)]">
+                          {" "}
+                          [
+                          <a
+                            href={project.live_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Live
+                          </a>
+                          ]
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/portfolio" className="wiki-see-all">
+                  Show all projects ({totalProjects || 0}) &rarr;
+                </Link>
+              </>
+            ) : (
+              <p>No projects listed yet.</p>
+            )}
+          </div>
+
+          {/* Wikipedia Infobox (Sidebar on desktop, stacked on mobile) */}
+          <aside className="wiki-infobox">
+            <div className="wiki-infobox-header">{name}</div>
+
+            {avatarUrl && (
+              <div className="wiki-infobox-image">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={avatarUrl} alt={name} />
+                <div className="text-xs text-[var(--wiki-muted)] mt-1.5">
+                  Profile photograph
+                </div>
+              </div>
+            )}
+
+            <table>
+              <tbody>
+                <tr>
+                  <th>Role</th>
+                  <td>{tagline || "Software Developer"}</td>
+                </tr>
+                {socialItems.length > 0 && (
+                  <tr>
+                    <th>Profiles</th>
+                    <td>
+                      <div className="flex flex-col gap-1">
+                        {socialItems.map((item) => (
+                          <a
+                            key={item.label}
+                            href={item.href}
+                            target={item.external ? "_blank" : undefined}
+                            rel={
+                              item.external ? "noopener noreferrer" : undefined
+                            }
+                          >
+                            {item.label}
+                          </a>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                <tr>
+                  <th>Projects</th>
+                  <td>
+                    <Link href="/portfolio">
+                      {totalProjects || 0} documented
+                    </Link>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Notes</th>
+                  <td>
+                    <Link href="/notes">{totalArticles || 0} written</Link>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </aside>
+        </div>
+
+        {/* Wikipedia Footer */}
+        <footer className="wiki-footer">
+          <div>This page was last edited in nostalgic mode.</div>
+          <div suppressHydrationWarning>
+            Copyright &copy; {new Date().getFullYear()} {name}. Released under
+            personal portfolio license.
+          </div>
+        </footer>
       </main>
     );
   }

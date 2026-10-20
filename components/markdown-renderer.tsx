@@ -62,7 +62,44 @@ function CopyButton({ code }: { code: string }) {
   );
 }
 
+function generateHeadingId(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getNodeText(node: React.ReactNode): string {
+  if (!node) return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(getNodeText).join("");
+  if (typeof node === "object" && "props" in node) {
+    const el = node as React.ReactElement<{ children?: React.ReactNode }>;
+    return getNodeText(el.props.children);
+  }
+  return "";
+}
+
 const markdownComponents: Components = {
+  h2({ children, ...props }) {
+    const text = getNodeText(children);
+    const id = generateHeadingId(text);
+    return (
+      <h2 id={id} className="scroll-mt-20 group relative" {...props}>
+        {children}
+      </h2>
+    );
+  },
+  h3({ children, ...props }) {
+    const text = getNodeText(children);
+    const id = generateHeadingId(text);
+    return (
+      <h3 id={id} className="scroll-mt-20 group relative" {...props}>
+        {children}
+      </h3>
+    );
+  },
   pre({ children, ...props }) {
     return (
       <div className="relative group my-5 overflow-hidden rounded-xl border border-zinc-800/80 bg-[#0d1117] shadow-lg">
@@ -119,9 +156,32 @@ const markdownComponents: Components = {
       </blockquote>
     );
   },
+  img({ src, alt, ...props }) {
+    if (!src) return null;
+    return (
+      <figure className="wiki-thumb-right">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt={alt || ""} {...props} />
+        {alt && <figcaption className="wiki-thumb-caption">{alt}</figcaption>}
+      </figure>
+    );
+  },
 };
 
-export function MarkdownRenderer({ content }: { content: string }) {
+export function MarkdownRenderer({
+  content,
+  stripLeadingH1 = true,
+}: {
+  content: string;
+  stripLeadingH1?: boolean;
+}) {
+  const processedContent = React.useMemo(() => {
+    if (!content) return "";
+    if (!stripLeadingH1) return content;
+    // Remove leading H1 if markdown begins with # Title to prevent double headers
+    return content.replace(/^#\s+[^\r\n]+(?:\r?\n)+/, "");
+  }, [content, stripLeadingH1]);
+
   return (
     <div
       className="prose prose-neutral dark:prose-invert max-w-none
@@ -141,7 +201,7 @@ export function MarkdownRenderer({ content }: { content: string }) {
         rehypePlugins={[rehypeHighlight]}
         components={markdownComponents}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </div>
   );
