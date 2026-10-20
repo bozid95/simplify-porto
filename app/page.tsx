@@ -339,7 +339,7 @@ export default async function Home({
           <div className="flex items-center gap-3">
             <nav className="wiki-nav">
               <Link href="/" className="wiki-nav-item active">
-                Article
+                Home
               </Link>
               <Link href="/portfolio" className="wiki-nav-item">
                 Projects
