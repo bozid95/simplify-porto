@@ -334,7 +334,6 @@ export default async function Home({
         <header className="wiki-header">
           <Link href="/" className="wiki-logo">
             <span className="wiki-logo-mark">W</span>
-            <span>{name}</span>
             <span>Home</span>
           </Link>
           <div className="flex items-center gap-3">
