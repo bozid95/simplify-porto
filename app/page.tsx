@@ -367,32 +367,6 @@ export default async function Home({
               {tagline.toLowerCase() || "software developer"}. {bio}
             </p>
 
-            <h2>Recent Notes</h2>
-            {nostalgiaArticles && nostalgiaArticles.length > 0 ? (
-              <>
-                <ul className="wiki-compact-list">
-                  {nostalgiaArticles.slice(0, 3).map((article) => (
-                    <li key={article.slug}>
-                      <Link
-                        href={`/notes/${article.slug}`}
-                        className="font-semibold"
-                      >
-                        {article.title}
-                      </Link>
-                      {article.excerpt
-                        ? ` — ${truncateText(article.excerpt, 100)}`
-                        : ""}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/notes" className="wiki-see-all">
-                  Show all notes ({totalArticles || 0}) &rarr;
-                </Link>
-              </>
-            ) : (
-              <p>No notes published yet.</p>
-            )}
-
             <h2>Selected Projects</h2>
             {nostalgiaProjects && nostalgiaProjects.length > 0 ? (
               <>
@@ -431,6 +405,32 @@ export default async function Home({
               </>
             ) : (
               <p>No projects listed yet.</p>
+            )}
+
+            <h2>Recent Notes</h2>
+            {nostalgiaArticles && nostalgiaArticles.length > 0 ? (
+              <>
+                <ul className="wiki-compact-list">
+                  {nostalgiaArticles.slice(0, 3).map((article) => (
+                    <li key={article.slug}>
+                      <Link
+                        href={`/notes/${article.slug}`}
+                        className="font-semibold"
+                      >
+                        {article.title}
+                      </Link>
+                      {article.excerpt
+                        ? ` — ${truncateText(article.excerpt, 100)}`
+                        : ""}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/notes" className="wiki-see-all">
+                  Show all notes ({totalArticles || 0}) &rarr;
+                </Link>
+              </>
+            ) : (
+              <p>No notes published yet.</p>
             )}
           </div>
 

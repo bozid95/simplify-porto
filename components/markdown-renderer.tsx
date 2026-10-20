@@ -189,8 +189,8 @@ export function MarkdownRenderer({
       prose-h1:text-2xl prose-h1:md:text-3xl prose-h1:mb-4
       prose-h2:text-xl prose-h2:md:text-2xl prose-h2:mt-8 prose-h2:mb-3
       prose-h3:text-lg prose-h3:md:text-xl prose-h3:mt-6 prose-h3:mb-2
-      prose-p:text-sm prose-p:md:text-base prose-p:leading-relaxed prose-p:text-muted-foreground
-      prose-li:text-sm prose-li:md:text-base prose-li:text-muted-foreground
+      prose-p:text-sm prose-p:md:text-base prose-p:leading-relaxed
+      prose-li:text-sm prose-li:md:text-base
       prose-strong:text-foreground
       prose-a:text-primary prose-a:underline hover:prose-a:opacity-80
       [&>*:first-child]:mt-0

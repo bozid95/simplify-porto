@@ -29,20 +29,20 @@ export default function HomeLoading() {
           </div>
 
           <div className="pt-4">
-            <div className="wiki-skeleton h-6 w-36 mb-3" />
-            <div className="space-y-2">
-              <div className="wiki-skeleton h-4 w-full" />
-              <div className="wiki-skeleton h-4 w-11/12" />
-              <div className="wiki-skeleton h-4 w-4/5" />
-            </div>
-          </div>
-
-          <div className="pt-4">
             <div className="wiki-skeleton h-6 w-40 mb-3" />
             <div className="space-y-2">
               <div className="wiki-skeleton h-4 w-full" />
               <div className="wiki-skeleton h-4 w-10/12" />
               <div className="wiki-skeleton h-4 w-3/4" />
+            </div>
+          </div>
+
+          <div className="pt-4">
+            <div className="wiki-skeleton h-6 w-36 mb-3" />
+            <div className="space-y-2">
+              <div className="wiki-skeleton h-4 w-full" />
+              <div className="wiki-skeleton h-4 w-11/12" />
+              <div className="wiki-skeleton h-4 w-4/5" />
             </div>
           </div>
         </div>

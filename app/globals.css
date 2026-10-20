@@ -829,18 +829,32 @@
   }
 
   /* Markdown content styling inside nostalgia mode (Wikipedia aesthetic) */
-  [data-mode="nostalgia"] .prose {
-    color: var(--wiki-text);
+  [data-mode="nostalgia"] .prose,
+  [data-mode="nostalgia"] .prose p,
+  [data-mode="nostalgia"] .prose li,
+  [data-mode="nostalgia"] .prose td,
+  [data-mode="nostalgia"] .prose div {
+    color: var(--wiki-text) !important;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Lato, Helvetica,
+      Arial, sans-serif !important;
     font-size: 0.9375rem;
     line-height: 1.68;
+  }
+
+  [data-mode="nostalgia"] .prose strong,
+  [data-mode="nostalgia"] .prose b {
+    color: var(--wiki-heading) !important;
+    font-weight: 700;
   }
 
   [data-mode="nostalgia"] .prose h1,
   [data-mode="nostalgia"] .prose h2,
   [data-mode="nostalgia"] .prose h3,
   [data-mode="nostalgia"] .prose h4 {
-    color: var(--wiki-heading);
-    font-family: "Source Serif 4", "Linux Libertine", Georgia, Times, serif;
+    color: var(--wiki-heading) !important;
+    font-family:
+      "Source Serif 4", "Linux Libertine", Georgia, Times, serif !important;
     font-weight: normal;
   }
 
