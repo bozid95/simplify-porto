@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Spotlight } from "@/components/ui/spotlight";
 import { GradientFrame } from "@/components/ui/gradient-frame";
 import { PageNav } from "@/components/page-nav";
+
+export const metadata: Metadata = {
+  title: "Engineering Portfolio & Projects",
+  description:
+    "Showcase of backend systems, cloud architectures, client projects, and open-source applications built by Widodo.",
+  alternates: {
+    canonical: "/portfolio",
+  },
+  openGraph: {
+    title: "Engineering Portfolio & Projects — Widodo",
+    description:
+      "Showcase of backend systems, cloud architectures, client projects, and open-source applications built by Widodo.",
+    url: "/portfolio",
+  },
+};
 
 function ExternalLinkIcon() {
   return (

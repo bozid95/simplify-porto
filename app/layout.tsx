@@ -16,9 +16,47 @@ const geistMono = Manrope({
   subsets: ["latin"],
 });
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://widodo.my.id";
+
 export const metadata: Metadata = {
-  title: "Widodo — Backend Developer",
-  description: "Personal portfolio & blog",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: "Widodo — Backend Developer",
+    template: "%s — Widodo",
+  },
+  description:
+    "Personal portfolio and engineering notes of Widodo, a Backend Developer specializing in scalable backend systems, APIs, NestJS, Go, and PostgreSQL.",
+  keywords: [
+    "Widodo",
+    "Backend Developer",
+    "Software Engineer",
+    "NestJS",
+    "Go",
+    "PostgreSQL",
+    "Docker",
+    "Web Developer Indonesia",
+    "Portfolio Widodo",
+  ],
+  authors: [{ name: "Widodo", url: BASE_URL }],
+  creator: "Widodo",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: BASE_URL,
+    siteName: "Widodo Portfolio & Notes",
+    title: "Widodo — Backend Developer",
+    description:
+      "Personal portfolio and engineering notes of Widodo, Backend Developer.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Widodo — Backend Developer",
+    description:
+      "Personal portfolio and engineering notes of Widodo, Backend Developer.",
+  },
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",

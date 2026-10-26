@@ -17,7 +17,7 @@ export async function generateMetadata({
   const supabase = await createClient();
   const { data: article } = await supabase
     .from("articles")
-    .select("title, excerpt")
+    .select("slug, title, excerpt, created_at")
     .eq("slug", slug)
     .eq("published", true)
     .single();
@@ -29,11 +29,26 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${article.title} — Widodo`,
-    description: article.excerpt || "Note by Widodo",
+    title: article.title,
+    description:
+      article.excerpt || `Technical note on ${article.title} by Widodo`,
+    alternates: {
+      canonical: `/blog/${article.slug}`,
+    },
     openGraph: {
-      title: `${article.title} — Widodo`,
-      description: article.excerpt || "Note by Widodo",
+      title: article.title,
+      description:
+        article.excerpt || `Technical note on ${article.title} by Widodo`,
+      url: `/blog/${article.slug}`,
+      type: "article",
+      publishedTime: article.created_at,
+      authors: ["Widodo"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description:
+        article.excerpt || `Technical note on ${article.title} by Widodo`,
     },
   };
 }
@@ -57,9 +72,36 @@ export default async function ArticlePage({
 
   if (!article) notFound();
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: article.title,
+    description: article.excerpt || article.title,
+    datePublished: article.created_at,
+    dateModified: article.updated_at || article.created_at,
+    author: {
+      "@type": "Person",
+      name: "Widodo",
+      url: "https://widodo.my.id",
+    },
+    publisher: {
+      "@type": "Person",
+      name: "Widodo",
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://widodo.my.id/blog/${article.slug}`,
+    },
+    keywords: article.tags?.join(", "),
+  };
+
   if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        />
         {/* Wikipedia Header */}
         <header className="wiki-header">
           <Link href="/" className="wiki-logo">
@@ -143,6 +185,10 @@ export default async function ArticlePage({
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute right-0 top-0 h-80 w-80 translate-x-1/4 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute left-0 top-1/3 h-96 w-96 -translate-x-1/4 rounded-full bg-muted-foreground/10 blur-3xl" />

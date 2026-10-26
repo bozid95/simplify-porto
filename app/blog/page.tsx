@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { Spotlight } from "@/components/ui/spotlight";
 import { GradientFrame } from "@/components/ui/gradient-frame";
 import { PageNav } from "@/components/page-nav";
+
+export const metadata: Metadata = {
+  title: "Notes & Tech Articles",
+  description:
+    "Archive of engineering notes, system design patterns, and programming tutorials by Widodo.",
+  alternates: {
+    canonical: "/blog",
+  },
+  openGraph: {
+    title: "Notes & Tech Articles — Widodo",
+    description:
+      "Archive of engineering notes, system design patterns, and programming tutorials by Widodo.",
+    url: "/blog",
+  },
+};
 
 function truncateText(text?: string | null, maxLength = 140) {
   const value = text?.trim();

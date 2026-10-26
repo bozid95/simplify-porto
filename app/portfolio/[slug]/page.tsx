@@ -87,12 +87,28 @@ export async function generateMetadata({
     };
   }
 
+  const canonicalPath = `/portfolio/${project.slug || project.id}`;
+
   return {
-    title: `${project.title} — Widodo`,
-    description: project.description || "Project by Widodo",
+    title: project.title,
+    description:
+      project.description || `Project case study: ${project.title} by Widodo`,
+    alternates: {
+      canonical: canonicalPath,
+    },
     openGraph: {
-      title: `${project.title} — Widodo`,
-      description: project.description || "Project by Widodo",
+      title: project.title,
+      description:
+        project.description || `Project case study: ${project.title} by Widodo`,
+      url: canonicalPath,
+      type: "website",
+      images: project.image_url ? [project.image_url] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description:
+        project.description || `Project case study: ${project.title} by Widodo`,
       images: project.image_url ? [project.image_url] : undefined,
     },
   };

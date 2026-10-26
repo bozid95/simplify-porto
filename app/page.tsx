@@ -327,9 +327,24 @@ export default async function Home({
     (item): item is SocialItem => Boolean(item.href),
   );
 
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: name,
+    jobTitle: tagline || "Backend Developer",
+    description: bio,
+    url: "https://widodo.my.id",
+    image: avatarUrl || undefined,
+    sameAs: socialItems.map((s) => s.href).filter(Boolean),
+  };
+
   if (mode !== "modern") {
     return (
       <main data-mode="nostalgia">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
         {/* Wikipedia Header */}
         <header className="wiki-header">
           <Link href="/" className="wiki-logo">
@@ -560,6 +575,10 @@ export default async function Home({
       suppressHydrationWarning
       className="relative overflow-hidden bg-background"
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
       <div className="pointer-events-none absolute inset-0">
         <Spotlight
           className="left-1/2 top-0 h-72 w-72 -translate-x-[130%]"
