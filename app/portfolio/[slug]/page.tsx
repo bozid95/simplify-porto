@@ -220,7 +220,7 @@ export default async function ProjectDetailPage({
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
                   {project.tech_stack?.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1">
-                      <span className="text-[var(--wiki-muted)] font-medium">
+                      <span className="text-(--wiki-muted) font-medium">
                         Technologies:
                       </span>
                       {project.tech_stack.map((tech: string) => (
@@ -236,7 +236,7 @@ export default async function ProjectDetailPage({
                       href={liveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-[var(--wiki-link)]"
+                      className="font-medium text-(--wiki-link)"
                     >
                       Visit site ↗
                     </a>
@@ -247,7 +247,7 @@ export default async function ProjectDetailPage({
                       href={repoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-[var(--wiki-link)]"
+                      className="font-medium text-(--wiki-link)"
                     >
                       Source code ↗
                     </a>
@@ -296,7 +296,7 @@ export default async function ProjectDetailPage({
               <img
                 src={project.image_url}
                 alt={project.title}
-                className="h-auto max-h-[520px] w-full object-cover"
+                className="h-auto max-h-130 w-full object-cover"
               />
             </div>
           )}

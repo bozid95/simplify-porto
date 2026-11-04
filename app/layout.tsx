@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AnalyticsTracker } from "@/components/analytics-tracker";
 import { Suspense } from "react";
 import "./globals.css";
+import "highlight.js/styles/github-dark.css";
 
 const geistSans = Manrope({
   variable: "--font-geist-sans",

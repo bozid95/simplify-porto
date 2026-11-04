@@ -1,10 +1,106 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useId } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import "highlight.js/styles/github-dark.css";
+import { useTheme } from "next-themes";
+
+function MermaidDiagram({ chart }: { chart: string }) {
+  const [svgHtml, setSvgHtml] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const [isRendering, setIsRendering] = useState(true);
+  const rawId = useId();
+  const diagramId = `mermaid-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    let isMounted = true;
+    setIsRendering(true);
+    setError(null);
+
+    const renderChart = async () => {
+      try {
+        const mermaid = (await import("mermaid")).default;
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: resolvedTheme === "dark" ? "dark" : "default",
+          securityLevel: "loose",
+          fontFamily: "inherit",
+        });
+
+        const { svg } = await mermaid.render(diagramId, chart);
+        if (isMounted) {
+          setSvgHtml(svg);
+          setError(null);
+          setIsRendering(false);
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          const message = err instanceof Error ? err.message : String(err);
+          setError(message);
+          setIsRendering(false);
+        }
+      }
+    };
+
+    renderChart();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [chart, diagramId, resolvedTheme]);
+
+  if (error) {
+    return (
+      <div className="my-5 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-xs font-mono">
+        <div className="flex items-center justify-between pb-2 mb-2 border-b border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold">
+          <span>Mermaid Syntax Error</span>
+          <CopyButton code={chart} />
+        </div>
+        <p className="text-muted-foreground mb-3">{error}</p>
+        <pre className="p-3 bg-zinc-950/80 rounded-lg text-zinc-300 overflow-x-auto text-[11px]">
+          <code>{chart}</code>
+        </pre>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-950/50 p-4 shadow-sm backdrop-blur-sm">
+      <div className="flex items-center justify-between pb-2 mb-3 border-b border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-muted-foreground">
+        <span className="flex items-center gap-1.5 font-semibold text-primary">
+          <svg
+            className="w-3.5 h-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"
+            />
+          </svg>
+          DIAGRAM
+        </span>
+        <CopyButton code={chart} />
+      </div>
+
+      {isRendering ? (
+        <div className="flex items-center justify-center py-10 text-xs font-mono text-muted-foreground animate-pulse">
+          Rendering diagram...
+        </div>
+      ) : (
+        <div
+          className="flex justify-center overflow-x-auto p-2 [&>svg]:max-w-full [&>svg]:h-auto"
+          dangerouslySetInnerHTML={{ __html: svgHtml }}
+        />
+      )}
+    </div>
+  );
+}
 
 function CopyButton({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
@@ -100,12 +196,9 @@ const markdownComponents: Components = {
       </h3>
     );
   },
-  pre({ children, ...props }) {
-    return (
-      <div className="relative group my-5 overflow-hidden rounded-xl border border-zinc-800/80 bg-[#0d1117] shadow-lg">
-        {children}
-      </div>
-    );
+  pre({ children }) {
+    // If the pre block contains a Mermaid diagram, don't wrap it in a code block frame
+    return <>{children}</>;
   },
   code({ className, children, ...props }) {
     const match = /language-(\w+)/.exec(className || "");
@@ -114,17 +207,21 @@ const markdownComponents: Components = {
       Boolean(match) ||
       (typeof children === "string" && children.includes("\n"));
 
+    if (match && match[1] === "mermaid") {
+      return <MermaidDiagram chart={codeString} />;
+    }
+
     if (isBlockCode) {
       const language = match ? match[1] : "text";
       return (
-        <div className="w-full">
+        <div className="relative group my-5 overflow-hidden rounded-xl border border-zinc-800/80 bg-[#0d1117] shadow-lg w-full">
           <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-950/70 px-4 py-1.5 select-none">
             <span className="font-mono text-xs font-medium uppercase tracking-wider text-zinc-400">
               {language}
             </span>
             <CopyButton code={codeString} />
           </div>
-          <pre className="!m-0 !p-4 !bg-transparent overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed">
+          <pre className="m-0! p-4! bg-transparent! overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed">
             <code className={className} {...props}>
               {children}
             </code>
